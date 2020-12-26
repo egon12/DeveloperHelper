@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/ConnectionFragment">
+    <fragment
+        android:id="@+id/ConnectionFragment"
+        android:name="com.egon12.developerhelper.ConnectionFragment"
+        android:label="Connections"
+        tools:layout="@layout/fragment_connection"
+        >
+
+        <action
+            android:id="@+id/action_ConnectionFragment_to_DatabaseFragment"
+            app:destination="@id/DatabaseFragment" />
+
+        <action
+            android:id="@+id/action_ConnectionFragment_to_EditConnectionFragment"
+            app:destination="@id/EditConnectionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/DatabaseFragment"
+        android:name="com.egon12.developerhelper.DatabaseFragment"
+        android:label="@string/database_fragment_label"
+        tools:layout="@layout/fragment_database">
+
+        <action
+            android:id="@+id/action_DatabaseFragment_to_TableFragment"
+            app:destination="@id/TableFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/TableFragment"
+        android:name="com.egon12.developerhelper.TableFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_table">
+        <action
+            android:id="@+id/action_TableFragment_to_RowFragment"
+            app:destination="@id/RowFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/RowFragment"
+        android:name="com.egon12.developerhelper.RowFragment"
+        android:label="@string/row_fragment_label"
+        tools:layout="@layout/fragment_row" />
+
+    <fragment
+        android:id="@+id/EditConnectionFragment"
+        android:name="com.egon12.developerhelper.EditConnectionFragment"
+        android:label="Create/Edit Connection"
+        tools:layout="@layout/fragment_edit_connection"
+        />
+
+</navigation>

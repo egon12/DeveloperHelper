@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class RowFragment: Fragment() {
@@ -35,6 +36,10 @@ class RowFragment: Fragment() {
             adapter.submitList(it)
         })
 
+        view.findViewById<FloatingActionButton>(R.id.btn_save).setOnClickListener {_ ->
+            viewModel.updateRow(adapter.currentList)
+        }
+
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -45,13 +50,19 @@ class RowFragment: Fragment() {
             private lateinit var cell: Cell
 
             private val tvValue = itemView.findViewById<EditText>(R.id.tv_value).apply {
-                this.addTextChangedListener { cell.dirtyValue = it.toString() }
+                this.addTextChangedListener {
+                    if (this.tag == null) {
+                        cell.dirtyValue = it.toString()
+                    }
+                }
             }
 
             fun bind(cell: Cell) {
                 this.cell = cell
                 tvLabel.text = cell.label
+                tvValue.tag = "Edited"
                 tvValue.setText(cell.value ?: "NULL")
+                tvValue.tag = null
                 tvLabelType.text = cell.type
             }
         }

@@ -44,8 +44,6 @@ class ConnectionFragment : Fragment() {
             viewModel.newConnection()
             findNavController().navigate(R.id.action_ConnectionFragment_to_EditConnectionFragment)
         }
-
-        viewModel.getAllConnection()
     }
 
     private fun click(conn: Connection) {

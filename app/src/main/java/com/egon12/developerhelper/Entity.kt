@@ -5,6 +5,7 @@ data class Table(
 )
 
 data class Data(
+    val table: Table?,
     val columnDefinition: List<ColumnDefinition>,
     val originalRows: List<Row>,
     var rows: List<Row>
@@ -19,7 +20,7 @@ data class Cell(
     val type: String,
     val value: String?
 ) {
-    var dirtyValue: String? = nult stl
+    var dirtyValue: String? = null
 
     companion object {
         fun from(columnDefinition: ColumnDefinition, value: String?): Cell {

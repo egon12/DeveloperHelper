@@ -1,5 +1,6 @@
 package com.egon12.developerhelper
 
+import android.util.Log
 import com.egon12.developerhelper.database.persistent.Connection
 import java.sql.DriverManager
 
@@ -12,6 +13,8 @@ interface Database {
     fun getData(table: Table): Data
 
     fun query(query: String): Data
+
+    fun update(table: Table, cells: List<Cell>)
 }
 
 class MySQLDatabase(val connInfo: Connection) : Database {
@@ -34,10 +37,14 @@ class MySQLDatabase(val connInfo: Connection) : Database {
 
     override fun getData(table: Table): Data {
         val query = "SELECT * FROM ${table.name} LIMIT 10"
-        return this.query(query)
+        return this._query(query, table)
     }
 
     override fun query(query: String): Data {
+        return this._query(query, null)
+    }
+
+    private fun _query(query: String, table: Table?): Data {
         val stmt = conn.createStatement()
         val result = stmt.executeQuery(query)
 
@@ -57,6 +64,22 @@ class MySQLDatabase(val connInfo: Connection) : Database {
             )
         }
 
-        return Data(columnDefinitions, rows, rows)
+        return Data(table, columnDefinitions, rows, rows)
+    }
+
+    override fun update(table: Table, cells: List<Cell>) {
+        val updatedCell = cells.filter { it.dirtyValue != null && it.dirtyValue != it.value }
+            .map { """ ${it.label} = "${it.dirtyValue}" """ }
+            .joinToString(",")
+
+        //val whereCondition = cells.first().label + ""
+        val whereCondition = """${cells.first().label} = "${cells.first().value}"  """
+
+        val query = "UPDATE ${table.name} SET $updatedCell WHERE $whereCondition"
+        Log.d("Database", query)
+
+        val stmt = conn.createStatement()
+        stmt.executeUpdate(query)
+        stmt.close()
     }
 }

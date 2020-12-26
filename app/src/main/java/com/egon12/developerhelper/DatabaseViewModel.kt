@@ -80,6 +80,16 @@ class DatabaseViewModel @ViewModelInject constructor(
         _row.value = cellList
     }
 
+    fun updateRow(cells: List<Cell>) = ioScope.launch {
+        try {
+            val table = data.value?.table ?: throw Exception("Cannot edit multiple table")
+            db?.update(table, cells)
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, "updateRow", e)
+            mainScope.launch { error.value = e }
+        }
+    }
+
     private fun setTablesResult(r: TablesResult) = mainScope.launch { _tables.value = r }
 
     fun newConnection() {
@@ -100,14 +110,6 @@ class DatabaseViewModel @ViewModelInject constructor(
                 }
             }
         }
-
-
-    }
-
-    fun getAllConnection() {
-        ioScope.launch { connectionDao.getAll() }
-
-
     }
 
     sealed class TablesResult() {

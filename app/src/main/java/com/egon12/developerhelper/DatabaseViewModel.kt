@@ -25,6 +25,7 @@ class DatabaseViewModel @ViewModelInject constructor(
     val connections: LiveData<List<Connection>>
         get() = connectionDao.getAll()
 
+    val dbFactory = DatabaseFactory()
     var db: Database? = null
 
     private val _tables = MutableLiveData<TablesResult>()
@@ -43,7 +44,7 @@ class DatabaseViewModel @ViewModelInject constructor(
     fun connectToDatabase(connection: Connection) = liveData(Dispatchers.IO) {
         emit(ConnectionStatus.Connecting)
         try {
-            db = MySQLDatabase(connection)
+            db = dbFactory.build(connection)
             db?.connect()
             emit(ConnectionStatus.Connected)
         } catch (e: java.lang.Exception) {

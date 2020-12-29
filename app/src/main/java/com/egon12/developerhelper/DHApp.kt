@@ -3,7 +3,6 @@ package com.egon12.developerhelper
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
-import com.egon12.developerhelper.database.persistent.ConnectionDao
 import com.egon12.developerhelper.database.persistent.DatabaseDB
 import dagger.Module
 import dagger.Provides
@@ -22,14 +21,13 @@ object ApplicationModule {
 
     @Singleton
     @Provides
-    fun provideDatabaseDB(@ApplicationContext ctx: Context): DatabaseDB {
-        return Room
-            .databaseBuilder(ctx, DatabaseDB::class.java, "database_db")
-            .build()
-    }
+    fun provideDatabaseDB(@ApplicationContext ctx: Context) = Room
+        .databaseBuilder(ctx, DatabaseDB::class.java, "database_db")
+        .build()
 
     @Provides
-    fun provideConnectionDao(db: DatabaseDB): ConnectionDao {
-        return db.connectionDao()
-    }
+    fun provideConnectionDao(db: DatabaseDB) = db.connectionDao()
+
+    @Provides
+    fun provideDatabaseFactory() = DatabaseFactory()
 }

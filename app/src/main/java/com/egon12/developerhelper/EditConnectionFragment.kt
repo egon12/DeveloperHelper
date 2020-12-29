@@ -26,8 +26,8 @@ class EditConnectionFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_edit_connection, container, false)
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
         super.onViewCreated(view, savedInstanceState)
 
         val etId = view.findViewById<TextInputEditText>(R.id.et_id)
@@ -40,18 +40,16 @@ class EditConnectionFragment : Fragment() {
         val btnMysql = view.findViewById<MaterialButton>(R.id.btn_mysql)
         val btnPostgres = view.findViewById<MaterialButton>(R.id.btn_postgresql)
 
-        if (viewModel.connectionInEdit != Connection.EMPTY) {
-            val c = viewModel.connectionInEdit
-            etId.setText(c.name)
-            etHost.setText(c.host)
-            etDbName.setText(c.dbName)
-            etUsername.setText(c.username)
-            etPassword.setText(c.password)
-            when (c.type) {
-                "mysql" -> btnMysql.performClick()
-                "postgresql" -> btnPostgres.performClick()
-                else -> btnMysql.performClick()
-            }
+        val c = viewModel.connection.onEdit
+        etId.setText(c.name)
+        etHost.setText(c.host)
+        etDbName.setText(c.dbName)
+        etUsername.setText(c.username)
+        etPassword.setText(c.password)
+        when (c.type) {
+            "mysql" -> btnMysql.performClick()
+            "postgresql" -> btnPostgres.performClick()
+            else -> btnMysql.performClick()
         }
 
         view.findViewById<MaterialButton>(R.id.btn_save).setOnClickListener {
@@ -62,7 +60,7 @@ class EditConnectionFragment : Fragment() {
                 else -> "unknown"
             }
 
-            viewModel.storeConnection(
+            viewModel.connection.save(
                 Connection(
                     etId.text.toString(),
                     type,

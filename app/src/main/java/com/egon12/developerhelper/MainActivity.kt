@@ -29,8 +29,13 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         val view = findViewById<View>(android.R.id.content)
-        model.error.observe(this, Observer{
+        model.error.observe(this, Observer {
             Snackbar.make(view, it.localizedMessage, Snackbar.LENGTH_LONG).show()
+        })
+
+        val progressBar = findViewById<View>(R.id.SHOW_PROGRESS)
+        model.loadingStatus.observe(this, Observer {
+            progressBar.visibility = if (it) View.VISIBLE else View.GONE
         })
     }
 

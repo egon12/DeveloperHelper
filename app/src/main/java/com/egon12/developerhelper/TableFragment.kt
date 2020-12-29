@@ -10,18 +10,19 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.egon12.developerhelper.TableFragment.Companion.PADDING_CELL
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class TableFragment : Fragment() {
 
     private var rvTable: RecyclerView? = null
 
-    private lateinit var viewModel: DatabaseViewModel
+    private val model: DatabaseViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,13 +35,13 @@ class TableFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        rvTable = view.findViewById(R.id.rv_table)
-        rvTable?.layoutManager = LinearLayoutManager(view.context)
+        rvTable = view.findViewById<RecyclerView>(R.id.rv_table)?.apply {
+            layoutManager = LinearLayoutManager(view.context)
+        }
 
         val lTableHeader = view.findViewById<LinearLayout>(R.id.table_header)
 
-        viewModel = ViewModelProvider(requireActivity()).get(DatabaseViewModel::class.java)
-        viewModel.data.observe(requireActivity(), Observer {
+        model.data.observe(viewLifecycleOwner, Observer {
             lTableHeader.removeAllViews()
 
             val columnWidths = it.columnDefinition.mapIndexed { idx, _ ->
@@ -60,11 +61,19 @@ class TableFragment : Fragment() {
             rvTable?.adapter = adapter
         })
 
+        view.findViewById<FloatingActionButton>(R.id.btn_insert)?.apply {
+            setOnClickListener {
+                model.insertNew()
+                findNavController().navigate(R.id.action_TableFragment_to_RowFragment)
+            }
+        }
+
+
     }
 
     private fun interactRow(row: Row?) {
         row?.let {
-            viewModel.loadRow(it)
+            model.loadRow(it)
             findNavController().navigate(R.id.action_TableFragment_to_RowFragment)
         }
     }

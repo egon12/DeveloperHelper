@@ -1,20 +1,20 @@
 package com.egon12.developerhelper
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -23,84 +23,83 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class DatabaseFragment : Fragment() {
 
-    private var rvTable: RecyclerView? = null
+    private val model: DatabaseViewModel by activityViewModels()
 
-    private val viewModel: DatabaseViewModel by activityViewModels()
+    private val adapter = TableListAdapter()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_database, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        rvTable = view.findViewById(R.id.rv_table)
-        rvTable?.layoutManager = LinearLayoutManager(view.context)
-        val adapter = TableListAdapter(this::navigateToTable)
+        model.table.apply {
+            data.observe(viewLifecycleOwner, Observer { adapter.submitList(it) })
+            reload()
+        }
 
-        viewModel.tables.observe(viewLifecycleOwner, Observer {
-            if (it is DatabaseViewModel.TablesResult.Success) {
-                adapter.submitList(it.table)
-            } else if (it is DatabaseViewModel.TablesResult.Error) {
-                Log.e("getTables", "Cannot show tables", it.exception)
-                Snackbar.make(view, it.exception.localizedMessage, Snackbar.LENGTH_LONG).show()
+        view.findViewById<RecyclerView?>(R.id.rv_table)?.apply {
+            layoutManager = LinearLayoutManager(view.context)
+            adapter = this@DatabaseFragment.adapter
+        }
+
+        val eQuery = view.findViewById<EditText>(R.id.edit_query)?.apply {
+            addTextChangedListener { editable ->
+                editable?.toString()?.let {
+                    model.table.search(it)
+                }
             }
-        })
+        }
 
-        viewModel.loadTables()
-
-        rvTable?.adapter = adapter
+        view.findViewById<FloatingActionButton>(R.id.btn_execute)?.apply {
+            setOnClickListener {
+                val query = eQuery?.text.toString()
+                model.query(query)
+                findNavController().navigate(R.id.action_DatabaseFragment_to_TableFragment)
+            }
+        }
     }
 
     private fun navigateToTable(table: Table?) {
         table?.let {
-            viewModel.loadData(it)
+            model.loadData(it)
             findNavController().navigate(R.id.action_DatabaseFragment_to_TableFragment)
         }
     }
 
 
-}
+    inner class TableListAdapter() :
+        ListAdapter<Table, TableListAdapter.ViewHolder>(TableDiffCallback()) {
 
-class TableDiffCallback : DiffUtil.ItemCallback<Table>() {
-    override fun areItemsTheSame(oldItem: Table, newItem: Table): Boolean = oldItem == newItem
+        inner class ViewHolder(v: View) :
+            RecyclerView.ViewHolder(v) {
 
-    override fun areContentsTheSame(oldItem: Table, newItem: Table): Boolean = oldItem == newItem
-}
+            private val tvTableName: TextView? = itemView.findViewById(R.id.table_name)
+            private var table: Table? = null
 
-class TableListAdapter(private val onItemClick: (Table?) -> Unit) :
-    ListAdapter<Table, TableListAdapter.ViewHolder>(TableDiffCallback()) {
+            init {
+                itemView.setOnClickListener { this@DatabaseFragment.navigateToTable(table) }
+            }
 
-    class ViewHolder(itemView: View, val onItemClick: (Table?) -> Unit) :
-        RecyclerView.ViewHolder(itemView) {
-        private val tvTableName: TextView? = itemView.findViewById(R.id.table_name)
-        private var table: Table? = null
-
-        init {
-            itemView.setOnClickListener {
-                onItemClick(table)
+            fun bind(table: Table) {
+                this.table = table
+                tvTableName?.text = table.name
             }
         }
 
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val layoutInflater = LayoutInflater.from(parent.context)
+            val view = layoutInflater.inflate(R.layout.item_table, parent, false)
+            return ViewHolder(view)
+        }
 
-        fun bind(table: Table) {
-            this.table = table
-            tvTableName?.text = table.name
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            holder.bind(getItem(position))
         }
     }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
-        val view = layoutInflater.inflate(R.layout.item_table, parent, false)
-        return ViewHolder(view, onItemClick)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
 }
-

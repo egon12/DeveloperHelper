@@ -20,7 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ConnectionFragment : Fragment() {
 
-    private val viewModel: DatabaseViewModel by activityViewModels()
+    private val model: DatabaseViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,22 +32,24 @@ class ConnectionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val rv = view.findViewById<RecyclerView>(R.id.rv_connections)
-        val adapter = ConnectionListAdapter(this::click, this::longClick)
-        rv.layoutManager = LinearLayoutManager(view.context)
-        rv.adapter = adapter
-        viewModel.connections.observe(requireActivity(), Observer {
-            adapter.submitList(it)
-        })
 
-        view.findViewById<FloatingActionButton>(R.id.fab).setOnClickListener {
-            viewModel.newConnection()
+        val listAdapter = ConnectionListAdapter(this::click, this::longClick)
+
+        view.findViewById<RecyclerView>(R.id.rv_connections)?.apply {
+            layoutManager = LinearLayoutManager(view.context)
+            adapter = listAdapter
+        }
+
+        model.connection.list.observe(viewLifecycleOwner, Observer { listAdapter.submitList(it) })
+
+        view.findViewById<FloatingActionButton>(R.id.fab)?.setOnClickListener {
+            model.connection.new()
             findNavController().navigate(R.id.action_ConnectionFragment_to_EditConnectionFragment)
         }
     }
 
     private fun click(conn: Connection) {
-        viewModel.connectToDatabase(conn).observe(this, Observer {
+        model.connectToDatabase(conn).observe(this, Observer {
             if (it == ConnectionStatus.Connected) {
                 findNavController().navigate(R.id.action_ConnectionFragment_to_DatabaseFragment)
             }
@@ -55,7 +57,7 @@ class ConnectionFragment : Fragment() {
     }
 
     private fun longClick(conn: Connection) {
-        viewModel.editConnection(conn)
+        model.connection.edit(conn)
         findNavController().navigate(R.id.action_ConnectionFragment_to_EditConnectionFragment)
     }
 

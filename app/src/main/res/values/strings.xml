@@ -6,7 +6,7 @@
     <string name="database_fragment_label">Database</string>
     <string name="row_fragment_label">Datum</string>
     <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
+    <string name="table_fragment_label">Data</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 

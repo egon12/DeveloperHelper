@@ -8,15 +8,18 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
-class RowFragment: Fragment() {
+class RowFragment : Fragment() {
+
+    private val model by activityViewModels<DatabaseViewModel>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -26,25 +29,26 @@ class RowFragment: Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val viewModel = ViewModelProvider(requireActivity()).get(DatabaseViewModel::class.java)
-        val rvRow = view.findViewById<RecyclerView>(R.id.rv_row)
-        val adapter = RowAdapter()
-        rvRow.layoutManager = LinearLayoutManager(view.context)
-        rvRow.adapter = adapter
+        val rowAdapter = RowAdapter()
 
-        viewModel.row.observe(requireActivity(), Observer{
-            adapter.submitList(it)
+        view.findViewById<RecyclerView>(R.id.rv_row)?.apply {
+            layoutManager = LinearLayoutManager(view.context)
+            adapter = rowAdapter
+        }
+
+        model.data.cells.observe(requireActivity(), Observer {
+            rowAdapter.submitList(it)
         })
 
-        view.findViewById<FloatingActionButton>(R.id.btn_save).setOnClickListener {_ ->
-            viewModel.updateRow(adapter.currentList)
+        view.findViewById<FloatingActionButton>(R.id.btn_save).setOnClickListener { _ ->
+            model.data.save(rowAdapter.currentList)
         }
 
         super.onViewCreated(view, savedInstanceState)
     }
 
-    class RowAdapter: ListAdapter<Cell, RowAdapter.ViewHolder>(CellDiffUtil()) {
-        class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    class RowAdapter : ListAdapter<Cell, RowAdapter.ViewHolder>(CellDiffUtil()) {
+        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             private val tvLabel = itemView.findViewById<TextView>(R.id.tv_label)
             private val tvLabelType = itemView.findViewById<TextView>(R.id.tv_label_type)
             private lateinit var cell: Cell

@@ -3,7 +3,6 @@ package com.egon12.developerhelper
 import android.graphics.Paint
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,14 +40,12 @@ class TableFragment : Fragment() {
 
         val lTableHeader = view.findViewById<LinearLayout>(R.id.table_header)
 
-        model.data.observe(viewLifecycleOwner, Observer {
+        model.data.data.observe(viewLifecycleOwner, Observer {
             lTableHeader.removeAllViews()
 
             val columnWidths = it.columnDefinition.mapIndexed { idx, _ ->
                 this.measureColumnWidth(view, it, idx)
             }
-
-            Log.d("columnWidth", columnWidths.toString())
 
             it.columnDefinition.forEachIndexed { idx, col ->
                 val tv = TextView(view.context)
@@ -63,7 +60,7 @@ class TableFragment : Fragment() {
 
         view.findViewById<FloatingActionButton>(R.id.btn_insert)?.apply {
             setOnClickListener {
-                model.insertNew()
+                model.data.new()
                 findNavController().navigate(R.id.action_TableFragment_to_RowFragment)
             }
         }
@@ -73,7 +70,7 @@ class TableFragment : Fragment() {
 
     private fun interactRow(row: Row?) {
         row?.let {
-            model.loadRow(it)
+            model.data.edit(it)
             findNavController().navigate(R.id.action_TableFragment_to_RowFragment)
         }
     }

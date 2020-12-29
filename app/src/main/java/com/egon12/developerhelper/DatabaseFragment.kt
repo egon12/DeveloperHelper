@@ -59,7 +59,7 @@ class DatabaseFragment : Fragment() {
         view.findViewById<FloatingActionButton>(R.id.btn_execute)?.apply {
             setOnClickListener {
                 val query = eQuery?.text.toString()
-                model.query(query)
+                model.data.query(query)
                 findNavController().navigate(R.id.action_DatabaseFragment_to_TableFragment)
             }
         }
@@ -67,7 +67,7 @@ class DatabaseFragment : Fragment() {
 
     private fun navigateToTable(table: Table?) {
         table?.let {
-            model.loadData(it)
+            model.data.getData(it)
             findNavController().navigate(R.id.action_DatabaseFragment_to_TableFragment)
         }
     }

@@ -1,4 +1,4 @@
-package com.egon12.developerhelper
+package com.egon12.developerhelper.database.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,6 +14,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.egon12.developerhelper.R
+import com.egon12.developerhelper.database.Cell
+import com.egon12.developerhelper.database.CellDiffUtil
+import com.egon12.developerhelper.database.viewmodel.DatabaseViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 

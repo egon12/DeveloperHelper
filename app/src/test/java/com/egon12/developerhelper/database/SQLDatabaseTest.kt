@@ -1,4 +1,4 @@
-package com.egon12.developerhelper
+package com.egon12.developerhelper.database
 
 import com.egon12.developerhelper.database.persistent.Connection
 import kotlinx.coroutines.runBlocking

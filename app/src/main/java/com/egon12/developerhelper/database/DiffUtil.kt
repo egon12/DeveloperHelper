@@ -1,4 +1,4 @@
-package com.egon12.developerhelper
+package com.egon12.developerhelper.database
 
 import androidx.recyclerview.widget.DiffUtil
 import com.egon12.developerhelper.database.persistent.Connection

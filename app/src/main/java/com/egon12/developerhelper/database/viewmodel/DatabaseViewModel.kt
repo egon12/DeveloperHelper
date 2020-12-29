@@ -1,13 +1,13 @@
-package com.egon12.developerhelper
+package com.egon12.developerhelper.database.viewmodel
 
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
+import com.egon12.developerhelper.database.ConnectionStatus
+import com.egon12.developerhelper.database.Database
+import com.egon12.developerhelper.database.DatabaseFactory
 import com.egon12.developerhelper.database.persistent.Connection
 import com.egon12.developerhelper.database.persistent.ConnectionDao
-import com.egon12.developerhelper.viewModel.ConnectionViewModel
-import com.egon12.developerhelper.viewModel.DataViewModel
-import com.egon12.developerhelper.viewModel.TableViewModel
 import dagger.hilt.android.scopes.ActivityScoped
 
 @ActivityScoped

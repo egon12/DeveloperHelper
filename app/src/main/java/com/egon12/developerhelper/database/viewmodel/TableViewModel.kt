@@ -1,9 +1,9 @@
-package com.egon12.developerhelper.viewModel
+package com.egon12.developerhelper.database.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.egon12.developerhelper.Database
-import com.egon12.developerhelper.Table
+import com.egon12.developerhelper.database.Database
+import com.egon12.developerhelper.database.Table
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

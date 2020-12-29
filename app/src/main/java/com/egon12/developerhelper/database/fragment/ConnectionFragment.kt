@@ -1,4 +1,4 @@
-package com.egon12.developerhelper
+package com.egon12.developerhelper.database.fragment
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -13,7 +13,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.egon12.developerhelper.R
+import com.egon12.developerhelper.database.ConnectionDiffUtil
+import com.egon12.developerhelper.database.ConnectionStatus
 import com.egon12.developerhelper.database.persistent.Connection
+import com.egon12.developerhelper.database.viewmodel.DatabaseViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 

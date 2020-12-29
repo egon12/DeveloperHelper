@@ -1,4 +1,4 @@
-package com.egon12.developerhelper
+package com.egon12.developerhelper.database
 
 data class Table(
     val name: String

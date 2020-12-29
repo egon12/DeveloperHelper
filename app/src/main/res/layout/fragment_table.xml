@@ -13,7 +13,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            tools:context=".DatabaseFragment">
+            tools:context=".database.fragment.DatabaseFragment">
 
             <LinearLayout
                 android:id="@+id/table_header"

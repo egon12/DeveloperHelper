@@ -1,7 +1,8 @@
-package com.egon12.developerhelper
+package com.egon12.developerhelper.database.fragment
 
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.egon12.developerhelper.MainActivity
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

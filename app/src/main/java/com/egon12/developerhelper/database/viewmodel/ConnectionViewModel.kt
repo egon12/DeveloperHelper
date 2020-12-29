@@ -1,4 +1,4 @@
-package com.egon12.developerhelper.viewModel
+package com.egon12.developerhelper.database.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

@@ -1,7 +1,9 @@
-package com.egon12.developerhelper
+package com.egon12.developerhelper.database.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
+import com.egon12.developerhelper.database.Database
+import com.egon12.developerhelper.database.DatabaseFactory
 import com.egon12.developerhelper.database.persistent.Connection
 import com.egon12.developerhelper.database.persistent.ConnectionDao
 import com.jraska.livedata.test

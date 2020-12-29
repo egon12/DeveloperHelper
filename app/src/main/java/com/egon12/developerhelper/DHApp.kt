@@ -3,6 +3,7 @@ package com.egon12.developerhelper
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.egon12.developerhelper.database.DatabaseFactory
 import com.egon12.developerhelper.database.persistent.DatabaseDB
 import dagger.Module
 import dagger.Provides

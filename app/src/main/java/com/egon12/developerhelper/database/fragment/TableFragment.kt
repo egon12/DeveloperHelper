@@ -1,4 +1,4 @@
-package com.egon12.developerhelper
+package com.egon12.developerhelper.database.fragment
 
 import android.graphics.Paint
 import android.os.Bundle
@@ -14,6 +14,10 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.egon12.developerhelper.R
+import com.egon12.developerhelper.database.Data
+import com.egon12.developerhelper.database.Row
+import com.egon12.developerhelper.database.viewmodel.DatabaseViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class TableFragment : Fragment() {

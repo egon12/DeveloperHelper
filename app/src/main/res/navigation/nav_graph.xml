@@ -6,7 +6,7 @@
     app:startDestination="@id/ConnectionFragment">
     <fragment
         android:id="@+id/ConnectionFragment"
-        android:name="com.egon12.developerhelper.ConnectionFragment"
+        android:name="com.egon12.developerhelper.database.fragment.ConnectionFragment"
         android:label="Connections"
         tools:layout="@layout/fragment_connection"
         >
@@ -21,7 +21,7 @@
     </fragment>
     <fragment
         android:id="@+id/DatabaseFragment"
-        android:name="com.egon12.developerhelper.DatabaseFragment"
+        android:name="com.egon12.developerhelper.database.fragment.DatabaseFragment"
         android:label="@string/database_fragment_label"
         tools:layout="@layout/fragment_database">
 
@@ -31,7 +31,7 @@
     </fragment>
     <fragment
         android:id="@+id/TableFragment"
-        android:name="com.egon12.developerhelper.TableFragment"
+        android:name="com.egon12.developerhelper.database.fragment.TableFragment"
         android:label="@string/table_fragment_label"
         tools:layout="@layout/fragment_table">
         <action
@@ -41,13 +41,13 @@
 
     <fragment
         android:id="@+id/RowFragment"
-        android:name="com.egon12.developerhelper.RowFragment"
+        android:name="com.egon12.developerhelper.database.fragment.RowFragment"
         android:label="@string/row_fragment_label"
         tools:layout="@layout/fragment_row" />
 
     <fragment
         android:id="@+id/EditConnectionFragment"
-        android:name="com.egon12.developerhelper.EditConnectionFragment"
+        android:name="com.egon12.developerhelper.database.fragment.EditConnectionFragment"
         android:label="Create/Edit Connection"
         tools:layout="@layout/fragment_edit_connection"
         />

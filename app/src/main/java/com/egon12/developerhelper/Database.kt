@@ -1,120 +1,52 @@
 package com.egon12.developerhelper
 
-import android.util.Log
 import com.egon12.developerhelper.database.persistent.Connection
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.lang.Exception
 import java.sql.DriverManager
+import kotlin.coroutines.CoroutineContext
 
 interface Database {
 
-    fun connect()
+    suspend fun getTables(): List<Table>
 
-    fun getTables(): List<Table>
+    suspend fun getData(table: Table): Data
 
-    fun getData(table: Table): Data
+    suspend fun query(query: String): Data
 
-    fun query(query: String): Data
+    suspend fun execute(query: String)
 
-    fun update(table: Table, cells: List<Cell>)
+    suspend fun update(table: Table, cells: List<Cell>)
 }
 
 class DatabaseFactory {
 
-    fun build(connInfo: Connection): Database {
-        return when (connInfo.type) {
-            "mysql" -> MySQLDatabase(connInfo)
-            "postgresql" -> PostgreSQLDatabase(connInfo)
-            else -> throw Exception("Unknown driver for" + connInfo.type)
-        }
+    private suspend fun createConnection(connInfo: Connection): java.sql.Connection {
+        val (name, type, host, dbName, username, password) = connInfo
+        val url = "jdbc:$type://$host/$dbName"
+        return withContext(Dispatchers.IO) { DriverManager.getConnection(url, username, password) }
+    }
+
+    suspend fun build(connInfo: Connection): Database {
+        val conn = createConnection(connInfo)
+        return SQLDatabase(conn)
     }
 }
 
-class MySQLDatabase(val connInfo: Connection) : Database {
 
-    lateinit var conn: java.sql.Connection
+class SQLDatabase(private val conn: java.sql.Connection) : Database {
 
-    override fun connect() {
-        this.connect(connInfo.host, connInfo.dbName, connInfo.username, connInfo.password)
-    }
+    private val io: CoroutineContext = Dispatchers.IO
 
-    private fun connect(host: String, dbName: String, user: String, password: String) {
-        val url = "jdbc:mysql://$host/$dbName"
-        conn = DriverManager.getConnection(url, user, password)
-    }
-
-    override fun getTables(): List<Table> {
-        val data = this.query("SHOW TABLES")
-        return data.originalRows.map { Table(it.cells[0] ?: "NULL") }
-    }
-
-    override fun getData(table: Table): Data {
-        val query = "SELECT * FROM ${table.name} LIMIT 10"
-        return this._query(query, table)
-    }
-
-    override fun query(query: String): Data {
-        return this._query(query, null)
-    }
-
-    private fun _query(query: String, table: Table?): Data {
-        val stmt = conn.createStatement()
-        val result = stmt.executeQuery(query)
-
-        val metaData = result.metaData
-
-        val columnDefinitions = (1..metaData.columnCount).map {
-            ColumnDefinition(
-                metaData.getColumnLabel(it),
-                metaData.getColumnTypeName(it)
-            )
+    override suspend fun getTables(): List<Table> {
+        val result = withContext(io) {
+            conn.metaData.getTables(null, "public", null, arrayOf("TABLE"))
         }
-
-        val rows = mutableListOf<Row>()
-        while (result.next()) {
-            rows.add(
-                Row(columnDefinitions.map { result.getString(it.label) })
-            )
-        }
-
-        return Data(table, columnDefinitions, rows, rows)
-    }
-
-    override fun update(table: Table, cells: List<Cell>) {
-        val updatedCell = cells.filter { it.dirtyValue != null && it.dirtyValue != it.value }
-            .map { """ ${it.label} = "${it.dirtyValue}" """ }
-            .joinToString(",")
-
-        //val whereCondition = cells.first().label + ""
-        val whereCondition = """${cells.first().label} = "${cells.first().value}"  """
-
-        val query = "UPDATE ${table.name} SET $updatedCell WHERE $whereCondition"
-        Log.d("Database", query)
-
-        val stmt = conn.createStatement()
-        stmt.executeUpdate(query)
-        stmt.close()
-    }
-}
-
-class PostgreSQLDatabase(val connInfo: Connection) : Database {
-
-    lateinit var conn: java.sql.Connection
-
-    override fun connect() {
-        this.connect(connInfo.host, connInfo.dbName, connInfo.username, connInfo.password)
-    }
-
-    private fun connect(host: String, dbName: String, user: String, password: String) {
-        val url = "jdbc:postgresql://$host/$dbName"
-        conn = DriverManager.getConnection(url, user, password)
-    }
-
-    override fun getTables(): List<Table> {
-        val result = conn.metaData.getTables(null, "public", null, arrayOf("TABLE"))
-
 
         val tableNameColumnIndex = 3
         val label = result.metaData.getColumnLabel(tableNameColumnIndex)
-
 
         val nameList = mutableListOf<String>()
         while (result.next()) {
@@ -124,18 +56,18 @@ class PostgreSQLDatabase(val connInfo: Connection) : Database {
         return nameList.map { Table(it) }
     }
 
-    override fun getData(table: Table): Data {
+    override suspend fun getData(table: Table): Data {
         val query = "SELECT * FROM ${table.name} LIMIT 10"
         return this._query(query, table)
     }
 
-    override fun query(query: String): Data {
+    override suspend fun query(query: String): Data {
         return this._query(query, null)
     }
 
-    private fun _query(query: String, table: Table?): Data {
+    private suspend fun _query(query: String, table: Table?): Data {
         val stmt = conn.createStatement()
-        val result = stmt.executeQuery(query)
+        val result = withContext(io) { stmt.executeQuery(query) }
 
         val metaData = result.metaData
 
@@ -156,7 +88,19 @@ class PostgreSQLDatabase(val connInfo: Connection) : Database {
         return Data(table, columnDefinitions, rows, rows)
     }
 
-    override fun update(table: Table, cells: List<Cell>) {
+    override suspend fun execute(query: String) {
+        try {
+            val stmt = conn.createStatement()
+            withContext(Dispatchers.IO) { stmt.execute(query) }
+            stmt.close()
+        } catch (e: java.sql.SQLSyntaxErrorException) {
+            val newE = Exception("Syntax Error on $query")
+            newE.initCause(e)
+            throw newE
+        }
+    }
+
+    override suspend fun update(table: Table, cells: List<Cell>) {
         val updatedCell = cells.filter { it.dirtyValue != null && it.dirtyValue != it.value }
             .map { """ ${it.label} = "${it.dirtyValue}" """ }
             .joinToString(",")
@@ -165,11 +109,9 @@ class PostgreSQLDatabase(val connInfo: Connection) : Database {
         val whereCondition = """${cells.first().label} = "${cells.first().value}"  """
 
         val query = "UPDATE ${table.name} SET $updatedCell WHERE $whereCondition"
-        Log.d("Database", query)
 
         val stmt = conn.createStatement()
-        stmt.executeUpdate(query)
+        withContext(io) { stmt.executeUpdate(query) }
         stmt.close()
     }
 }
-

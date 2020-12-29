@@ -53,18 +53,21 @@ class DatabaseViewModel @ViewModelInject constructor(
 
     private val _row = MutableLiveData<List<Cell>>()
     val row: LiveData<List<Cell>> = _row
+    private var isNew = false
     fun loadRow(row: Row) {
         val cellList = _data.value?.columnDefinition?.mapIndexed() { idx, cd ->
             Cell.from(cd, row.cells[idx])
         } ?: emptyList()
 
+        isNew = false
         _row.value = cellList
     }
 
     fun updateRow(cells: List<Cell>) = viewModelScope.launch {
         try {
             val table = data.value?.table ?: throw Exception("Cannot edit multiple table")
-            db?.update(table, cells)
+            if (isNew) db.insert(table, cells)
+            else db.update(table, cells)
         } catch (e: java.lang.Exception) {
             handleError(e, "updateRow")
         }
@@ -77,6 +80,29 @@ class DatabaseViewModel @ViewModelInject constructor(
     private fun handleError(e: Exception, message: String) {
         Log.e(TAG, message, e)
         error.postValue(e)
+    }
+
+    fun query(query: String) {
+        viewModelScope.launch {
+            try {
+                when {
+                    query.contains("INSERT", true) -> db.execute(query)
+                    query.contains("UPDATE", true) -> db.execute(query)
+                    else -> db.query(query).let { _data.postValue(it) }
+                }
+            } catch (e: java.lang.Exception) {
+                handleError(e, "loadData")
+            }
+        }
+    }
+
+    fun insertNew() {
+        val cellList = _data.value?.columnDefinition?.mapIndexed() { idx, cd ->
+            Cell.from(cd, "")
+        } ?: emptyList()
+
+        isNew = true
+        _row.value = cellList
     }
 
     companion object {

@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -47,9 +48,19 @@ class DatabaseFragment : Fragment() {
             adapter = this@DatabaseFragment.adapter
         }
 
-        view.findViewById<EditText>(R.id.edit_query)?.apply {
+        val eQuery = view.findViewById<EditText>(R.id.edit_query)?.apply {
             addTextChangedListener { editable ->
-                editable?.toString()?.let { model.table.search(it) }
+                editable?.toString()?.let {
+                    model.table.search(it)
+                }
+            }
+        }
+
+        view.findViewById<FloatingActionButton>(R.id.btn_execute)?.apply {
+            setOnClickListener {
+                val query = eQuery?.text.toString()
+                model.query(query)
+                findNavController().navigate(R.id.action_DatabaseFragment_to_TableFragment)
             }
         }
     }
@@ -60,6 +71,7 @@ class DatabaseFragment : Fragment() {
             findNavController().navigate(R.id.action_DatabaseFragment_to_TableFragment)
         }
     }
+
 
     inner class TableListAdapter() :
         ListAdapter<Table, TableListAdapter.ViewHolder>(TableDiffCallback()) {

@@ -17,6 +17,9 @@ interface Database {
     suspend fun execute(query: String)
 
     suspend fun update(table: Table, cells: List<Cell>)
+
+    suspend fun insert(table: Table, cells: List<Cell>)
+
 }
 
 class DatabaseFactory {
@@ -98,6 +101,7 @@ class SQLDatabase(private val conn: java.sql.Connection) : Database {
         }
     }
 
+
     override suspend fun update(table: Table, cells: List<Cell>) {
         val updatedCell = cells.filter { it.dirtyValue != null && it.dirtyValue != it.value }
             .map { """ ${it.label} = "${it.dirtyValue}" """ }
@@ -108,8 +112,16 @@ class SQLDatabase(private val conn: java.sql.Connection) : Database {
 
         val query = "UPDATE ${table.name} SET $updatedCell WHERE $whereCondition"
 
-        val stmt = conn.createStatement()
-        withContext(io) { stmt.executeUpdate(query) }
-        stmt.close()
+        execute(query)
+    }
+
+    override suspend fun insert(table: Table, cells: List<Cell>) {
+        val filtered = cells.filter { it.dirtyValue?.isNotEmpty() ?: false }
+        val columns = filtered.map { it.label }.joinToString()
+        val values = filtered.map { """ "${it.dirtyValue}" """ }.joinToString()
+
+        val query = "INSERT INTO ${table.name} ($columns) VALUES ($values)"
+
+        execute(query)
     }
 }

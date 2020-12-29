@@ -17,7 +17,8 @@ class TableViewModel(private val scope: CoroutineScope) {
     private var allTables: List<Table> = emptyList()
 
     fun search(s: String) {
-        _data.postValue(allTables.filter { it.name.contains(s) })
+        val cleanS = s.trim().toLowerCase()
+        _data.postValue(allTables.filter { it.name.toLowerCase().contains(cleanS) })
     }
 
     fun reload() {

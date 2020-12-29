@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.egon12.developerhelper.TableFragment.Companion.PADDING_CELL
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class TableFragment : Fragment() {
 
@@ -59,6 +60,13 @@ class TableFragment : Fragment() {
             val adapter = DataAdapter(it, this::interactRow, columnWidths)
             rvTable?.adapter = adapter
         })
+
+        view.findViewById<FloatingActionButton>(R.id.btn_insert)?.apply {
+            setOnClickListener {
+                model.insertNew()
+                findNavController().navigate(R.id.action_TableFragment_to_RowFragment)
+            }
+        }
 
 
     }

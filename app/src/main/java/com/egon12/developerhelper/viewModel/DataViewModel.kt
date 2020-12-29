@@ -2,6 +2,7 @@ package com.egon12.developerhelper.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
 import com.egon12.developerhelper.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -62,19 +63,19 @@ class DataViewModel(
         isNew = false
     }
 
-    fun save(input: List<Cell>) {
-        scope.launch {
-            try {
-                data.value
-                    ?.table
-                    ?.let {
-                        if (isNew) db.insert(it, input)
-                        else db.update(it, input)
-                        getData(it)
-                    }
-            } catch (e: java.lang.Exception) {
-                handleError(e, "updateRow")
-            }
+    fun save(input: List<Cell>) = liveData {
+        try {
+            data.value
+                ?.table
+                ?.let {
+                    if (isNew) db.insert(it, input)
+                    else db.update(it, input)
+                    getData(it)
+                    emit(true)
+                }
+        } catch (e: java.lang.Exception) {
+            handleError(e, "updateRow")
+            emit(false)
         }
     }
 }

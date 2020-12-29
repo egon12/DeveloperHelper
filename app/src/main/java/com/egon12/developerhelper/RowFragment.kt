@@ -10,6 +10,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -41,7 +42,9 @@ class RowFragment : Fragment() {
         })
 
         view.findViewById<FloatingActionButton>(R.id.btn_save).setOnClickListener { _ ->
-            model.data.save(rowAdapter.currentList)
+            model.data.save(rowAdapter.currentList).observe(viewLifecycleOwner, Observer {
+                if (it) findNavController().popBackStack()
+            })
         }
 
         super.onViewCreated(view, savedInstanceState)

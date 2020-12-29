@@ -14,14 +14,13 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.egon12.developerhelper.TableFragment.Companion.PADDING_CELL
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class TableFragment : Fragment() {
 
-    private var rvTable: RecyclerView? = null
-
     private val model: DatabaseViewModel by activityViewModels()
+
+    var paddingCell: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,27 +33,28 @@ class TableFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        rvTable = view.findViewById<RecyclerView>(R.id.rv_table)?.apply {
+        paddingCell = (view.resources.displayMetrics.density * PADDING_CELL).toInt()
+
+        val rvTable = view.findViewById<RecyclerView>(R.id.rv_table)?.apply {
             layoutManager = LinearLayoutManager(view.context)
         }
 
         val lTableHeader = view.findViewById<LinearLayout>(R.id.table_header)
 
-        model.data.data.observe(viewLifecycleOwner, Observer {
+        model.data.data.observe(viewLifecycleOwner, Observer { data ->
             lTableHeader.removeAllViews()
 
-            val columnWidths = it.columnDefinition.mapIndexed { idx, _ ->
-                this.measureColumnWidth(view, it, idx)
+            val columnWidths = data.columnDefinition.mapIndexed { idx, _ ->
+                this.measureColumnWidth(view, data, idx)
             }
 
-            it.columnDefinition.forEachIndexed { idx, col ->
-                val tv = TextView(view.context)
-                tv.width = columnWidths[idx]
-                tv.text = col.label
-                lTableHeader.addView(tv)
+            data.columnDefinition.forEachIndexed { idx, col ->
+                createTextView(view, columnWidths[idx])
+                    .apply { text = col.label }
+                    .let { lTableHeader.addView(it) }
             }
 
-            val adapter = DataAdapter(it, this::interactRow, columnWidths)
+            val adapter = DataAdapter(data, columnWidths)
             rvTable?.adapter = adapter
         })
 
@@ -64,8 +64,35 @@ class TableFragment : Fragment() {
                 findNavController().navigate(R.id.action_TableFragment_to_RowFragment)
             }
         }
+    }
 
+    inner class DataAdapter(private val data: Data, private val columnWidths: List<Int>) :
+        RecyclerView.Adapter<DataAdapter.ViewHolder>() {
 
+        inner class ViewHolder(v: View, val texts: List<TextView>) : RecyclerView.ViewHolder(v) {
+
+            private var row: Row? = null
+
+            init {
+                itemView.setOnClickListener { this@TableFragment.interactRow(row) }
+            }
+
+            fun bind(row: Row) {
+                this.row = row
+                row.cells.forEachIndexed { idx, value -> texts[idx].text = value ?: "NULL" }
+            }
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val tvList = columnWidths.map { columnWidth -> createTextView(parent, columnWidth) }
+            val group = LinearLayout(parent.context).apply { orientation = LinearLayout.HORIZONTAL }
+            tvList.forEach { group.addView(it) }
+            return ViewHolder(group, tvList)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, pos: Int) = holder.bind(data.rows[pos])
+
+        override fun getItemCount() = data.rows.size
     }
 
     private fun interactRow(row: Row?) {
@@ -75,82 +102,31 @@ class TableFragment : Fragment() {
         }
     }
 
-    private fun measureColumnWidth(
-        view: View,
-        data: Data,
-        index: Int
-    ): Int {
+    private fun measureColumnWidth(view: View, data: Data, index: Int): Int {
         val paint = Paint()
-        paint.textSize = view.resources.displayMetrics.density * 25
-        var mr = paint.measureText(data.columnDefinition[index].label)
+        paint.textSize = view.resources.displayMetrics.scaledDensity * 25
+        var width = paint.measureText(data.columnDefinition[index].label)
 
         data.rows.forEach {
-            val newmr = paint.measureText(it.cells[index] ?: "")
-            if (mr < newmr) mr = newmr
+            val newWidth = paint.measureText(it.cells[index] ?: "")
+            if (width < newWidth) width = newWidth
         }
 
-        if (mr > MAX_CELL_WIDTH) mr = MAX_CELL_WIDTH
+        if (width > MAX_CELL_WIDTH) width = MAX_CELL_WIDTH
 
-        return mr.toInt()
+        return width.toInt()
+    }
+
+    private fun createTextView(view: View, columnWidth: Int) = TextView(view.context).apply {
+        setPadding(paddingCell, paddingCell, paddingCell, paddingCell)
+        width = columnWidth
+        maxLines = 2
+        ellipsize = TextUtils.TruncateAt.MARQUEE
+        minHeight = 25
     }
 
     companion object {
         const val MAX_CELL_WIDTH = 500.0F
         const val PADDING_CELL = 4
     }
-
 }
-
-class DataAdapter(
-    private val data: Data,
-    private val onItemClick: (Row?) -> Unit,
-    private val columnWidths: List<Int>
-) :
-    RecyclerView.Adapter<DataAdapter.ViewHolder>() {
-
-    class ViewHolder(itemView: View, val texts: List<TextView>, val onItemClick: (Row?) -> Unit) :
-        RecyclerView.ViewHolder(itemView) {
-
-        private var row: Row? = null
-
-        init {
-            itemView.setOnClickListener {
-                onItemClick(row)
-            }
-        }
-
-        fun bind(row: Row) {
-            this.row = row
-            row.cells.forEachIndexed { idx, value -> texts[idx].text = value ?: "NULL" }
-        }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val ctx = parent.context
-
-        val padding: Int = (parent.resources.displayMetrics.density * PADDING_CELL).toInt()
-
-        val tvList = columnWidths.map { columnWidth ->
-            TextView(ctx).also {
-                it.setPadding(padding, padding, padding, padding)
-                it.width = columnWidth
-                it.maxLines = 2
-                it.ellipsize = TextUtils.TruncateAt.MARQUEE
-                it.minHeight = 25
-            }
-        }
-
-        val group = LinearLayout(ctx)
-        group.orientation = LinearLayout.HORIZONTAL
-        tvList.forEach { group.addView(it) }
-
-        return ViewHolder(group, tvList, onItemClick)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(data.rows[position])
-    }
-
-    override fun getItemCount() = data.rows.size
-}
-

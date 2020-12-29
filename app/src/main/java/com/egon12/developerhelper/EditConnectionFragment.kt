@@ -40,7 +40,7 @@ class EditConnectionFragment : Fragment() {
         val btnMysql = view.findViewById<MaterialButton>(R.id.btn_mysql)
         val btnPostgres = view.findViewById<MaterialButton>(R.id.btn_postgresql)
 
-        val c = viewModel.connectionInEdit
+        val c = viewModel.connection.onEdit
         etId.setText(c.name)
         etHost.setText(c.host)
         etDbName.setText(c.dbName)
@@ -60,7 +60,7 @@ class EditConnectionFragment : Fragment() {
                 else -> "unknown"
             }
 
-            viewModel.storeConnection(
+            viewModel.connection.save(
                 Connection(
                     etId.text.toString(),
                     type,

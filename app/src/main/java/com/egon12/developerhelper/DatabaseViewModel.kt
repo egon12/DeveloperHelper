@@ -5,13 +5,14 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.egon12.developerhelper.database.persistent.Connection
 import com.egon12.developerhelper.database.persistent.ConnectionDao
+import com.egon12.developerhelper.viewModel.ConnectionViewModel
 import com.egon12.developerhelper.viewModel.TableViewModel
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.launch
 
 @ActivityScoped
 class DatabaseViewModel @ViewModelInject constructor(
-    private val connectionDao: ConnectionDao,
+    connectionDao: ConnectionDao,
     private val dbFactory: DatabaseFactory
 ) : ViewModel(), LifecycleObserver {
 
@@ -19,9 +20,7 @@ class DatabaseViewModel @ViewModelInject constructor(
 
     lateinit var db: Database
 
-    val connections: LiveData<List<Connection>> by lazy { connectionDao.getAll() }
-
-    var connectionInEdit: Connection = Connection.EMPTY
+    val connection = ConnectionViewModel(connectionDao, viewModelScope, this::handleError)
 
     val table = TableViewModel(viewModelScope)
 
@@ -71,27 +70,6 @@ class DatabaseViewModel @ViewModelInject constructor(
         }
     }
 
-    fun newConnection() {
-        connectionInEdit = Connection.EMPTY
-    }
-
-    fun editConnection(conn: Connection) {
-        connectionInEdit = conn
-    }
-
-    fun storeConnection(conn: Connection) {
-        viewModelScope.launch {
-            try {
-                if (connectionInEdit == Connection.EMPTY) {
-                    connectionDao.insertAll(conn)
-                } else {
-                    connectionDao.update(conn)
-                }
-            } catch (e: Exception) {
-                handleError(e, "storeConnection")
-            }
-        }
-    }
 
     private val _loadingStatus = MutableLiveData<Boolean>()
     val loadingStatus: LiveData<Boolean> = _loadingStatus

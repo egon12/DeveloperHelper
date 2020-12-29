@@ -58,11 +58,11 @@ class DatabaseViewModelTest {
     @Test
     fun testGetConnection() {
         connections.postValue(emptyList())
-        assertEquals(emptyList<Connection>(), model.connections.value)
+        assertEquals(emptyList<Connection>(), model.connection.list.value)
 
         val connectionList = listOf(Connection.EMPTY)
         connections.postValue(connectionList)
-        assertEquals(connectionList, model.connections.value)
+        assertEquals(connectionList, model.connection.list.value)
     }
 
     @Test

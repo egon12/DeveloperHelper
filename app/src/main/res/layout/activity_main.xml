@@ -20,6 +20,18 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <ProgressBar
+        android:id="@+id/SHOW_PROGRESS"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@color/black"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="100dp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <include layout="@layout/content_main" />
 
 

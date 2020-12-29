@@ -23,10 +23,13 @@ interface ConnectionDao {
     fun getAll(): LiveData<List<Connection>>
 
     @Insert
-    fun insertAll(vararg db: Connection)
+    suspend fun insertAll(vararg db: Connection)
+
+    @Update
+    suspend fun update(db: Connection)
 
     @Delete
-    fun delete(db: Connection)
+    suspend fun delete(db: Connection)
 }
 
 @Database(entities = arrayOf(Connection::class), version = 1)

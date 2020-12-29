@@ -2,8 +2,8 @@ package com.egon12.developerhelper
 
 import com.egon12.developerhelper.database.persistent.Connection
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
 internal class SQLDatabaseTest {
 

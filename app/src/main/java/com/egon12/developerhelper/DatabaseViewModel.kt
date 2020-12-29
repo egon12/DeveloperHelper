@@ -5,8 +5,9 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.egon12.developerhelper.database.persistent.Connection
 import com.egon12.developerhelper.database.persistent.ConnectionDao
+import com.egon12.developerhelper.viewModel.TableViewModel
 import dagger.hilt.android.scopes.ActivityScoped
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 
 @ActivityScoped
 class DatabaseViewModel @ViewModelInject constructor(
@@ -14,22 +15,22 @@ class DatabaseViewModel @ViewModelInject constructor(
     private val dbFactory: DatabaseFactory
 ) : ViewModel(), LifecycleObserver {
 
-    private val ioScope = CoroutineScope(Dispatchers.IO + Job())
-    private val mainScope = CoroutineScope(Dispatchers.Main + Job())
-
     val error = MutableLiveData<java.lang.Exception>()
 
-    var db: Database? = null
+    lateinit var db: Database
 
     val connections: LiveData<List<Connection>> by lazy { connectionDao.getAll() }
 
     var connectionInEdit: Connection = Connection.EMPTY
+
+    val table = TableViewModel(viewModelScope)
 
     fun connectToDatabase(connection: Connection) = liveData {
         _loadingStatus.postValue(true)
         emit(ConnectionStatus.Connecting)
         try {
             db = dbFactory.build(connection)
+            table.db = db
             emit(ConnectionStatus.Connected)
         } catch (e: java.lang.Exception) {
             emit(ConnectionStatus.Disconnected)
@@ -39,37 +40,16 @@ class DatabaseViewModel @ViewModelInject constructor(
         }
     }
 
-    private val _tables = MutableLiveData<List<Table>>()
-    fun tables() = liveData {
-        try {
-            db?.getTables()?.let {
-                Log.d(TAG, "getTables" + it.map { it.name }.joinToString())
-                emit(it)
-            }
-            //emitSource(_tables)
-        } catch (e: java.lang.Exception) {
-            handleError(e, "loadTables")
-        }
-    }
-
-    fun refreshTables() {
-        viewModelScope.launch {
-            try {
-                db?.getTables()?.let { _tables.postValue(it) }
-            } catch (e: java.lang.Exception) {
-                handleError(e, "loadTables")
-            }
-        }
-    }
-
-
     private val _data = MutableLiveData<Data>()
     val data: LiveData<Data> = _data
 
 
-    fun loadData(t: Table) = ioScope.launch {
-        val d = db?.getData(t)
-        mainScope.launch { _data.value = d }
+    fun loadData(t: Table) = viewModelScope.launch {
+        try {
+            db?.getData(t)?.let { _data.postValue(it) }
+        } catch (e: java.lang.Exception) {
+            handleError(e, "loadData")
+        }
     }
 
     private val _row = MutableLiveData<List<Cell>>()
@@ -82,7 +62,7 @@ class DatabaseViewModel @ViewModelInject constructor(
         _row.value = cellList
     }
 
-    fun updateRow(cells: List<Cell>) = ioScope.launch {
+    fun updateRow(cells: List<Cell>) = viewModelScope.launch {
         try {
             val table = data.value?.table ?: throw Exception("Cannot edit multiple table")
             db?.update(table, cells)
@@ -100,13 +80,15 @@ class DatabaseViewModel @ViewModelInject constructor(
     }
 
     fun storeConnection(conn: Connection) {
-        if (connectionInEdit == Connection.EMPTY) {
-            ioScope.launch {
-                try {
+        viewModelScope.launch {
+            try {
+                if (connectionInEdit == Connection.EMPTY) {
                     connectionDao.insertAll(conn)
-                } catch (e: Exception) {
-                    handleError(e, "storeConnection")
+                } else {
+                    connectionDao.update(conn)
                 }
+            } catch (e: Exception) {
+                handleError(e, "storeConnection")
             }
         }
     }

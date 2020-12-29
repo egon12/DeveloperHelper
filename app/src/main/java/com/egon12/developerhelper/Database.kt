@@ -1,10 +1,8 @@
 package com.egon12.developerhelper
 
 import com.egon12.developerhelper.database.persistent.Connection
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.lang.Exception
 import java.sql.DriverManager
 import kotlin.coroutines.CoroutineContext
 
@@ -57,7 +55,7 @@ class SQLDatabase(private val conn: java.sql.Connection) : Database {
     }
 
     override suspend fun getData(table: Table): Data {
-        val query = "SELECT * FROM ${table.name} LIMIT 10"
+        val query = "SELECT * FROM ${table.name} LIMIT 1000"
         return this._query(query, table)
     }
 
@@ -65,9 +63,9 @@ class SQLDatabase(private val conn: java.sql.Connection) : Database {
         return this._query(query, null)
     }
 
-    private suspend fun _query(query: String, table: Table?): Data {
+    private suspend fun _query(query: String, table: Table?): Data = withContext(io) {
         val stmt = conn.createStatement()
-        val result = withContext(io) { stmt.executeQuery(query) }
+        val result = stmt.executeQuery(query)
 
         val metaData = result.metaData
 
@@ -85,7 +83,7 @@ class SQLDatabase(private val conn: java.sql.Connection) : Database {
             )
         }
 
-        return Data(table, columnDefinitions, rows, rows)
+        Data(table, columnDefinitions, rows, rows)
     }
 
     override suspend fun execute(query: String) {

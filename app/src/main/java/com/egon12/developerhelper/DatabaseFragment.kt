@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -20,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class DatabaseFragment : Fragment() {
 
-    private val viewModel: DatabaseViewModel by activityViewModels()
+    private val model: DatabaseViewModel by activityViewModels()
 
     private val adapter = TableListAdapter()
 
@@ -35,18 +37,26 @@ class DatabaseFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.tables().observe(viewLifecycleOwner, Observer {
-            adapter.submitList(it)
-        })
+        model.table.apply {
+            data.observe(viewLifecycleOwner, Observer { adapter.submitList(it) })
+            reload()
+        }
 
-        val rvTable = view.findViewById<RecyclerView?>(R.id.rv_table)
-        rvTable?.layoutManager = LinearLayoutManager(view.context)
-        rvTable?.adapter = adapter
+        view.findViewById<RecyclerView?>(R.id.rv_table)?.apply {
+            layoutManager = LinearLayoutManager(view.context)
+            adapter = this@DatabaseFragment.adapter
+        }
+
+        view.findViewById<EditText>(R.id.edit_query)?.apply {
+            addTextChangedListener { editable ->
+                editable?.toString()?.let { model.table.search(it) }
+            }
+        }
     }
 
     private fun navigateToTable(table: Table?) {
         table?.let {
-            viewModel.loadData(it)
+            model.loadData(it)
             findNavController().navigate(R.id.action_DatabaseFragment_to_TableFragment)
         }
     }

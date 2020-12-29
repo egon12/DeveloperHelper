@@ -17,7 +17,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.jupiter.api.DisplayName
 
 class DatabaseViewModelTest {
 
@@ -57,7 +56,6 @@ class DatabaseViewModelTest {
 
 
     @Test
-    @DisplayName("Should get connection from connectionDao")
     fun testGetConnection() {
         connections.postValue(emptyList())
         assertEquals(emptyList<Connection>(), model.connections.value)
@@ -68,11 +66,8 @@ class DatabaseViewModelTest {
     }
 
     @Test
-    @DisplayName("Should display loading when try to connect to db")
     fun testLoadTable() {
-        model.connectToDatabase(Connection.EMPTY).observeForever{
-            println(it)
-        }
+        model.connectToDatabase(Connection.EMPTY).observeForever {}
 
         //println(model.loadingStatus.value)
         model.loadingStatus.test().awaitValue().assertValue(false)

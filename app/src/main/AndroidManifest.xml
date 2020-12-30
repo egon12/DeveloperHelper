@@ -13,7 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:name=".DHApp"
         android:supportsRtl="true"
-        android:theme="@style/Theme.DeveloperHelper">
+        android:theme="@style/Theme.DeveloperHelper"
+        android:usesCleartextTraffic="true"
+        >
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

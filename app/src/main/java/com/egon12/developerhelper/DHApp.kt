@@ -5,6 +5,9 @@ import android.content.Context
 import androidx.room.Room
 import com.egon12.developerhelper.database.DatabaseFactory
 import com.egon12.developerhelper.database.persistent.DatabaseDB
+import com.egon12.developerhelper.rest.RestClient
+import com.egon12.developerhelper.rest.RestClientImpl
+import com.egon12.developerhelper.rest.persistent.HttpRequestDB
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,4 +34,20 @@ object ApplicationModule {
 
     @Provides
     fun provideDatabaseFactory() = DatabaseFactory()
+
+
+    @Singleton
+    @Provides
+    fun provideHttpRequestDB(@ApplicationContext ctx: Context) = Room
+        .databaseBuilder(ctx, HttpRequestDB::class.java, "http_request_db")
+        .build()
+
+    @Provides
+    fun provideHttpRequestDao(db: HttpRequestDB) = db.httpRequestDao()
+
+    @Provides
+    fun provideVariablesDao(db: HttpRequestDB) = db.variablesDao()
+
+    @Provides
+    fun provideOkHttpClient(): RestClient = RestClientImpl()
 }

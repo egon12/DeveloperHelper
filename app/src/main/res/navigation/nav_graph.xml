@@ -18,6 +18,11 @@
         <action
             android:id="@+id/action_ConnectionFragment_to_EditConnectionFragment"
             app:destination="@id/EditConnectionFragment" />
+
+        <action
+            android:id="@+id/action_ConnectionFragment_to_RestFragment"
+            app:destination="@id/RestFragment" />
+
     </fragment>
     <fragment
         android:id="@+id/DatabaseFragment"
@@ -50,6 +55,13 @@
         android:name="com.egon12.developerhelper.database.fragment.EditConnectionFragment"
         android:label="Create/Edit Connection"
         tools:layout="@layout/fragment_edit_connection"
+        />
+
+    <fragment
+        android:id="@+id/RestFragment"
+        android:name="com.egon12.developerhelper.rest.Rest"
+        android:label="Call API"
+        tools:layout="@layout/fragment_rest"
         />
 
 </navigation>

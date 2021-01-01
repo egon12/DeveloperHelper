@@ -21,6 +21,7 @@ class RestViewModel @ViewModelInject constructor(
     val requests by lazy { httpRequestDao.all() }
 
     fun saveRequest(req: HttpRequest) = liveData {
+        emit(Load)
         try {
             if (req.id > 0) {
                 httpRequestDao.update(req)

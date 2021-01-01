@@ -1,42 +1,70 @@
 package com.egon12.developerhelper.database.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.egon12.developerhelper.database.persistent.Connection
-import com.egon12.developerhelper.database.persistent.ConnectionDao
+import com.egon12.developerhelper.ConnInfo
+import com.egon12.developerhelper.ConnInfoDao
+import com.egon12.developerhelper.ConnType
+import com.egon12.developerhelper.database.persistent.DBConnInfo
+import com.egon12.developerhelper.database.persistent.DBType
+import com.egon12.developerhelper.database.persistent.DatabaseDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class ConnectionViewModel(
-    private val connectionDao: ConnectionDao,
+    private val connectionDao: ConnInfoDao,
+    private val databaseDao: DatabaseDao,
     private val scope: CoroutineScope,
     private val handleError: (Exception, String) -> Unit
 ) {
 
-    val list: LiveData<List<Connection>> by lazy {
+    val onEdit = MutableLiveData<ConnInfo>()
+
+    val dbOnEdit = MutableLiveData<DBConnInfo>()
+
+    init {
+        new()
+    }
+
+    val list by lazy {
         try {
-            connectionDao.getAll()
+            connectionDao.all()
         } catch (e: Exception) {
             handleError(e, "GetConnectionInfo")
-            MutableLiveData<List<Connection>>(emptyList())
+            MutableLiveData(emptyList())
         }
     }
 
-    var onEdit: Connection = Connection.EMPTY
 
     fun new() {
-        onEdit = Connection.EMPTY
+        val conn = ConnInfo(name = "", type = ConnType.Database)
+        onEdit.value = conn
+        dbOnEdit.value = DBConnInfo(conn.uuid, DBType.MySQL)
     }
 
-    fun edit(conn: Connection) {
-        onEdit = conn
+    fun edit(conn: ConnInfo) {
+        scope.launch {
+            onEdit.value = conn
+            if (conn.type == ConnType.Database) {
+                dbOnEdit.postValue(databaseDao.find(conn.uuid))
+            }
+        }
     }
 
-    fun save(conn: Connection) {
+    fun save(conn: ConnInfo) {
         scope.launch {
             try {
-                if (onEdit == Connection.EMPTY) connectionDao.insertAll(conn)
-                else connectionDao.update(conn)
+                connectionDao.upsert(conn)
+            } catch (e: Exception) {
+                handleError(e, "SaveConnectionInfo")
+            }
+        }
+    }
+
+    fun save(conn: ConnInfo?, dbConn: DBConnInfo?) {
+        scope.launch {
+            try {
+                conn?.let { connectionDao.upsert(it) }
+                dbConn?.let { databaseDao.upsert(dbConn) }
             } catch (e: Exception) {
                 handleError(e, "SaveConnectionInfo")
             }

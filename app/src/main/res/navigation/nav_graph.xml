@@ -3,26 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
+    android:label="Connections"
     app:startDestination="@id/ConnectionFragment">
     <fragment
         android:id="@+id/ConnectionFragment"
         android:name="com.egon12.developerhelper.database.fragment.ConnectionFragment"
         android:label="Connections"
-        tools:layout="@layout/fragment_connection"
-        >
-
+        tools:layout="@layout/fragment_connection">
         <action
-            android:id="@+id/action_ConnectionFragment_to_DatabaseFragment"
-            app:destination="@id/DatabaseFragment" />
-
+            android:id="@+id/openDatabase"
+            app:destination="@id/DatabaseFragment"
+            app:enterAnim="@anim/fragment_open_enter" />
         <action
-            android:id="@+id/action_ConnectionFragment_to_EditConnectionFragment"
+            android:id="@+id/editDatabase"
             app:destination="@id/EditConnectionFragment" />
-
         <action
             android:id="@+id/action_ConnectionFragment_to_RestFragment"
             app:destination="@id/RestFragment" />
-
     </fragment>
     <fragment
         android:id="@+id/DatabaseFragment"
@@ -30,6 +27,11 @@
         android:label="@string/database_fragment_label"
         tools:layout="@layout/fragment_database">
 
+        <argument
+            android:name="uuid"
+            android:defaultValue="@null"
+            app:argType="java.util.UUID"
+            app:nullable="true" />
         <action
             android:id="@+id/action_DatabaseFragment_to_TableFragment"
             app:destination="@id/TableFragment" />
@@ -54,14 +56,12 @@
         android:id="@+id/EditConnectionFragment"
         android:name="com.egon12.developerhelper.database.fragment.EditConnectionFragment"
         android:label="Create/Edit Connection"
-        tools:layout="@layout/fragment_edit_connection"
-        />
+        tools:layout="@layout/fragment_edit_connection" />
 
     <fragment
         android:id="@+id/RestFragment"
         android:name="com.egon12.developerhelper.rest.Rest"
         android:label="Call API"
-        tools:layout="@layout/fragment_rest"
-        />
+        tools:layout="@layout/fragment_rest" />
 
 </navigation>

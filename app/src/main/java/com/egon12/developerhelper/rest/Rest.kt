@@ -12,6 +12,7 @@ import androidx.appcompat.widget.AppCompatSpinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -36,94 +37,17 @@ class Rest : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val viewPager = view.findViewById<ViewPager2>(R.id.pager)?.apply {
-            adapter = RestFragmentsAdapter(this@Rest)
-        }
-
-        val tabLayout = view.findViewById<TabLayout>(R.id.tab_layout)
-        TabLayoutMediator(tabLayout, viewPager!!) { tab, position ->
-            tab.text = when (position) {
-                0 -> "History"
-                1 -> "Request"
-                2 -> "Response"
-                else -> ""
-            }
-        }.attach()
-
-
-        val spinnerMethod = view.findViewById<AppCompatSpinner>(R.id.spinner_method)
-        ArrayAdapter<String>(
-            requireActivity(),
-            android.R.layout.simple_spinner_item,
-            arrayOf("GET", "POST", "PUT", "PATCH", "DELETE")
-        ).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerMethod.adapter = this
-        }
-
-        val editURL = view.findViewById<EditText>(R.id.edit_url).apply {
-            setText("http://localhost:8080")
-        }
-
-        view.findViewById<FloatingActionButton>(R.id.btn_execute).apply {
-            setOnClickListener {
-                val url = editURL.text.toString()
-                model.saveRequest(HttpRequest(0, url, "GET", url))
-                    .observe(viewLifecycleOwner, Observer { })
-            }
-
-            /*
-            setOnClickListener {
-                val method = spinnerMethod.selectedItem as String
-                val url = editURL.text.toString()
-                model.request(method, url)
-            }
-             */
-        }
-    }
-
-    inner class RestFragmentsAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
-
-        //override fun getItemCount() = 5
-        override fun getItemCount() = 3
-
-        override fun createFragment(position: Int): Fragment {
-            return when (position) {
-                0 -> HistoryFragment()
-                1 -> RequestBodyFragment()
-                2 -> ResponseFragment()
-                else -> HistoryFragment()
-            }
-        }
-    }
-}
-
-abstract class AutoInflateLayoutFragment(val layoutId: Int) : Fragment() {
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(layoutId, container, false)
-    }
-
-}
-
-class HistoryFragment : AutoInflateLayoutFragment(R.layout.fragment_rest_history)
-
-class RequestBodyFragment : AutoInflateLayoutFragment(R.layout.fragment_rest_request) {
-
-    val model by activityViewModels<RestViewModel>()
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         val listAdapter = RequestAdapter()
         model.requests.observe(viewLifecycleOwner, Observer { listAdapter.submitList(it) })
 
         view.findViewById<RecyclerView>(R.id.rv_request).apply {
             layoutManager = LinearLayoutManager(view.context)
             adapter = listAdapter
+        }
+
+        view.findViewById<FloatingActionButton>(R.id.btn_add).setOnClickListener {
+            findNavController().navigate(R.id.action_ConnectionFragment_to_RestFragment)
+
         }
     }
 
@@ -159,7 +83,16 @@ class RequestBodyFragment : AutoInflateLayoutFragment(R.layout.fragment_rest_req
             holder.bind(getItem(position))
         }
     }
+}
 
+abstract class AutoInflateLayoutFragment(val layoutId: Int) : Fragment() {
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(layoutId, container, false)
+    }
 }
 
 class ResponseFragment : AutoInflateLayoutFragment(R.layout.fragment_rest_response) {

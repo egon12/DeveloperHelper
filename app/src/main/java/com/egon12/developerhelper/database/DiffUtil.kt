@@ -1,7 +1,7 @@
 package com.egon12.developerhelper.database
 
 import androidx.recyclerview.widget.DiffUtil
-import com.egon12.developerhelper.database.persistent.Connection
+import com.egon12.developerhelper.ConnInfo
 
 class TableDiffCallback : DiffUtil.ItemCallback<Table>() {
     override fun areItemsTheSame(oldItem: Table, newItem: Table): Boolean =
@@ -17,10 +17,8 @@ class CellDiffUtil : DiffUtil.ItemCallback<Cell>() {
 }
 
 
-class ConnectionDiffUtil : DiffUtil.ItemCallback<Connection>() {
-    override fun areItemsTheSame(oldItem: Connection, newItem: Connection): Boolean =
-        oldItem.name == newItem.name
+class ConnInfoDiffUtil : DiffUtil.ItemCallback<ConnInfo>() {
+    override fun areItemsTheSame(o: ConnInfo, n: ConnInfo): Boolean = o.uuid == n.uuid
 
-    override fun areContentsTheSame(oldItem: Connection, newItem: Connection): Boolean =
-        oldItem == newItem
+    override fun areContentsTheSame(o: ConnInfo, n: ConnInfo): Boolean = o == n
 }

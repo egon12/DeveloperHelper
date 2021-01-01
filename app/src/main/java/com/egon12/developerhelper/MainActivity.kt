@@ -35,11 +35,11 @@ class MainActivity : AppCompatActivity() {
 
         val view = findViewById<View>(android.R.id.content)
         databaseViewModel.error.observe(this, Observer {
-            Snackbar.make(view, it.localizedMessage, Snackbar.LENGTH_LONG).show()
+            Snackbar.make(view, it.localizedMessage ?: "Error", Snackbar.LENGTH_LONG).show()
         })
 
         restViewModel.error.observe(this, Observer {
-            Snackbar.make(view, it.localizedMessage, Snackbar.LENGTH_LONG).show()
+            Snackbar.make(view, it.localizedMessage ?: "Error", Snackbar.LENGTH_LONG).show()
         })
 
         val progressBar = findViewById<View>(R.id.SHOW_PROGRESS)

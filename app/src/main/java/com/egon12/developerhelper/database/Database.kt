@@ -1,6 +1,6 @@
 package com.egon12.developerhelper.database
 
-import com.egon12.developerhelper.database.persistent.Connection
+import com.egon12.developerhelper.database.persistent.DBConnInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.sql.DriverManager
@@ -24,13 +24,15 @@ interface Database {
 
 class DatabaseFactory {
 
-    private suspend fun createConnection(connInfo: Connection): java.sql.Connection {
-        val (name, type, host, dbName, username, password) = connInfo
-        val url = "jdbc:$type://$host/$dbName"
-        return withContext(Dispatchers.IO) { DriverManager.getConnection(url, username, password) }
+    private suspend fun createConnection(d: DBConnInfo) = withContext(Dispatchers.IO) {
+        DriverManager.getConnection(
+            "jdbc:${d.type.jdbcScheme}://${d.host}/${d.dbName}",
+            d.username,
+            d.password
+        )
     }
 
-    suspend fun build(connInfo: Connection): Database {
+    suspend fun build(connInfo: DBConnInfo): Database {
         val conn = createConnection(connInfo)
         return SQLDatabase(conn)
     }
@@ -59,14 +61,14 @@ class SQLDatabase(private val conn: java.sql.Connection) : Database {
 
     override suspend fun getData(table: Table): Data {
         val query = "SELECT * FROM ${table.name} LIMIT 1000"
-        return this._query(query, table)
+        return this.internalQuery(query, table)
     }
 
     override suspend fun query(query: String): Data {
-        return this._query(query, null)
+        return this.internalQuery(query, null)
     }
 
-    private suspend fun _query(query: String, table: Table?): Data = withContext(io) {
+    private suspend fun internalQuery(query: String, table: Table?) = withContext(io) {
         val stmt = conn.createStatement()
         val result = stmt.executeQuery(query)
 
@@ -104,8 +106,7 @@ class SQLDatabase(private val conn: java.sql.Connection) : Database {
 
     override suspend fun update(table: Table, cells: List<Cell>) {
         val updatedCell = cells.filter { it.dirtyValue != null && it.dirtyValue != it.value }
-            .map { """ ${it.label} = "${it.dirtyValue}" """ }
-            .joinToString(",")
+            .joinToString(",") { """ ${it.label} = "${it.dirtyValue}" """ }
 
         //val whereCondition = cells.first().label + ""
         val whereCondition = """${cells.first().label} = "${cells.first().value}"  """
@@ -117,8 +118,8 @@ class SQLDatabase(private val conn: java.sql.Connection) : Database {
 
     override suspend fun insert(table: Table, cells: List<Cell>) {
         val filtered = cells.filter { it.dirtyValue?.isNotEmpty() ?: false }
-        val columns = filtered.map { it.label }.joinToString()
-        val values = filtered.map { """ "${it.dirtyValue}" """ }.joinToString()
+        val columns = filtered.joinToString { it.label }
+        val values = filtered.joinToString { """ "${it.dirtyValue}" """ }
 
         val query = "INSERT INTO ${table.name} ($columns) VALUES ($values)"
 

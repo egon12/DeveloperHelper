@@ -46,7 +46,7 @@ class DatabaseViewModelTest {
 
     val connections = MutableLiveData<List<Connection>>()
     val connectionDao = mockk<ConnectionDao>().also {
-        every { it.getAll() }.returns(connections)
+        every { it.all() }.returns(connections)
     }
 
     val database = mockk<Database>()

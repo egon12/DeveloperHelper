@@ -5,6 +5,15 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import java.util.*
 
+@Entity
+data class ConnInfo(
+    @PrimaryKey override val uuid: UUID = UUID.randomUUID(),
+    @ColumnInfo var name: String,
+    @ColumnInfo var type: ConnType,
+    @ColumnInfo var description: String = "",
+    @ColumnInfo var parentUUID: UUID? = null,
+) : HasUUID
+
 enum class ConnType {
     Database, Http, GraphQL, GRPC;
 
@@ -16,15 +25,6 @@ enum class ConnType {
         fun toType(s: String): ConnType = enumValueOf(s)
     }
 }
-
-@Entity
-data class ConnInfo(
-    @PrimaryKey override val uuid: UUID = UUID.randomUUID(),
-    @ColumnInfo var name: String,
-    @ColumnInfo var type: ConnType,
-    @ColumnInfo var description: String = "",
-    @ColumnInfo var parentUUID: UUID? = null,
-) : HasUUID
 
 @Dao
 interface ConnInfoDao {

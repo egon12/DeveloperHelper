@@ -49,9 +49,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val item = menu?.add("Kucing")
+        var item = menu?.add("Kucing")
         item?.setOnMenuItemClickListener {
             findNavController(R.id.nav_host_fragment).navigate(R.id.action_ConnectionFragment_to_RestFragment)
+            true
+        }
+
+        item = menu?.add("Dua")
+        item?.setOnMenuItemClickListener {
+            findNavController(R.id.nav_host_fragment).navigate(R.id.action_ConnectionFragment_to_GRPCFragment)
             true
         }
         return true

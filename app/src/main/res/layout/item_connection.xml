@@ -13,7 +13,7 @@
         android:id="@+id/im_connection_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:src="@drawable/ic_baseline_table_chart_24"
+        android:src="@drawable/ic_database"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/tv_name"

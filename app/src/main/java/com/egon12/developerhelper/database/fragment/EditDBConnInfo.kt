@@ -21,7 +21,7 @@ import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class EditConnectionFragment : Fragment() {
+class EditDBConnInfo : Fragment() {
 
     private val viewModel: DatabaseViewModel by activityViewModels()
 
@@ -30,7 +30,7 @@ class EditConnectionFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_edit_connection, container, false)
+        return inflater.inflate(R.layout.fragment_edit_db_connection, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -85,7 +85,7 @@ class ConnectionFragment : Fragment() {
     private fun click(conn: ConnInfo) {
         val action = when (conn.type) {
             ConnType.Database -> R.id.openDatabase
-            //ConnType.Http -> R.id.action_ConnectionFragment_to_RestFragment
+            ConnType.Http -> R.id.action_ConnectionFragment_to_RestFragment
             else -> throw Exception("Not implemented click on " + conn.type.name)
         }
 

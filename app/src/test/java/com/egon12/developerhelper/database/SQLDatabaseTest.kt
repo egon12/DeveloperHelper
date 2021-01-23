@@ -1,18 +1,20 @@
 package com.egon12.developerhelper.database
 
-import com.egon12.developerhelper.database.persistent.Connection
+import com.egon12.developerhelper.database.persistent.DBConnInfo
+import com.egon12.developerhelper.database.persistent.DBType
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.util.*
 
 internal class SQLDatabaseTest {
 
     @Test
     fun testForMySQLDatabase() {
 
-        val connInfo = Connection(
-            name = "name",
-            type = "mysql",
+        val connInfo = DBConnInfo(
+            uuid = UUID.randomUUID(),
+            type = DBType.MySQL,
             host = "localhost",
             dbName = "dh",
             username = "root",
@@ -38,9 +40,9 @@ internal class SQLDatabaseTest {
     @Test
     fun testForPostgresDatabase() {
 
-        val connInfo = Connection(
-            name = "name",
-            type = "postgresql",
+        val connInfo = DBConnInfo(
+            uuid = UUID.randomUUID(),
+            type = DBType.Postgre,
             host = "localhost",
             dbName = "dh",
             username = "postgres",

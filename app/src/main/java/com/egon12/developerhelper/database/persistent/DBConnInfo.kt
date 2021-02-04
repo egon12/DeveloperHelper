@@ -49,12 +49,5 @@ interface DatabaseDao {
     @Delete
     suspend fun delete(db: DBConnInfo)
 
-    suspend fun upsert(db: DBConnInfo) {
-        try {
-            insert(db)
-        } catch(e: SQLiteConstraintException) {
-            update(db)
-        }
-    }
 }
 

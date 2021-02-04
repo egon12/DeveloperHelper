@@ -21,6 +21,8 @@ class ConnectionViewModel(
 
     val dbOnEdit = MutableLiveData<DBConnInfo>()
 
+    private var isNew = false
+
     init {
         new()
     }
@@ -36,12 +38,14 @@ class ConnectionViewModel(
 
 
     fun new() {
+        isNew = true
         val conn = ConnInfo(name = "", type = ConnType.Database)
         onEdit.value = conn
         dbOnEdit.value = DBConnInfo(conn.uuid, DBType.MySQL)
     }
 
     fun edit(conn: ConnInfo) {
+        isNew = false
         scope.launch {
             onEdit.value = conn
             if (conn.type == ConnType.Database) {
@@ -50,21 +54,16 @@ class ConnectionViewModel(
         }
     }
 
-    fun save(conn: ConnInfo) {
-        scope.launch {
-            try {
-                connectionDao.upsert(conn)
-            } catch (e: Exception) {
-                handleError(e, "SaveConnectionInfo")
-            }
-        }
-    }
-
     fun save(conn: ConnInfo?, dbConn: DBConnInfo?) {
         scope.launch {
             try {
-                conn?.let { connectionDao.upsert(it) }
-                dbConn?.let { databaseDao.upsert(dbConn) }
+                if (isNew) {
+                    conn?.let { connectionDao.insert(it) }
+                    dbConn?.let { databaseDao.insert(it) }
+                } else {
+                    conn?.let { connectionDao.update(it) }
+                    dbConn?.let { databaseDao.update(it) }
+                }
             } catch (e: Exception) {
                 handleError(e, "SaveConnectionInfo")
             }

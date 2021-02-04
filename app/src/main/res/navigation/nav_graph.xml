@@ -63,7 +63,7 @@
 
     <fragment
         android:id="@+id/RestFragment"
-        android:name="com.egon12.developerhelper.rest.Rest"
+        android:name="com.egon12.developerhelper.rest.RestFragment"
         android:label="Call API"
         tools:layout="@layout/fragment_rest" />
     <fragment

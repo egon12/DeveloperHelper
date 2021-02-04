@@ -42,13 +42,4 @@ interface ConnInfoDao {
 
     @Delete
     suspend fun delete(conn: ConnInfo)
-
-    @Transaction
-    suspend fun upsert(conn: ConnInfo) {
-        try {
-            insert(conn)
-        } catch (e: SQLiteConstraintException) {
-            update(conn)
-        }
-    }
 }

@@ -67,4 +67,123 @@ class RestViewModel @ViewModelInject constructor(
         const val TAG = "RestViewModel"
     }
 
+    val collection = liveData {
+        emit(Collection.parse(str))
+    }
 }
+
+
+val str = """
+            {
+                "info": {
+                    "_postman_id": "12345",
+                    "name": "Somekind of something V2",
+                    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+                },
+                "item": [
+                    {
+                        "name": "Group1",
+                        "item": [
+                            {
+                                "name": "Group2",
+                                "item": [{
+                                    "name":"Request1",
+                                    "request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{intools-token}}"
+											},
+											{
+												"key": "Referer",
+												"value": "https://www.tokopedia.com",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{host}}/v1/something?query1=1&query2=2",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"v1",
+												"something",
+												"section"
+											],
+											"query": [
+												{
+													"key": "query1",
+													"value": "1"
+												},
+												{
+													"key": "query2",
+													"value": "2"
+												}
+											]
+										},
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\"hello\":\"world\"}"
+                                        }
+                                    }
+                                }]
+                            },
+                            {
+                                "name": "Group2 (Copy)",
+                                "item": [{
+                                    "name":"Request1",
+                                    "request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{intools-token}}"
+											},
+											{
+												"key": "Referer",
+												"value": "https://www.tokopedia.com",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{host}}/v1/something?query1=1&query2=2",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"v1",
+												"something",
+												"section"
+											],
+											"query": [
+												{
+													"key": "query1",
+													"value": "1"
+												},
+												{
+													"key": "query2",
+													"value": "2"
+												}
+											]
+										},
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\"hello\":\"world\"}"
+                                        }
+                                    }
+                                }]
+                            }
+                        ]
+                    }]
+                }
+        """.trimIndent()
+

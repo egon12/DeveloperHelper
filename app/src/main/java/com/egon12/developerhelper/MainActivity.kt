@@ -5,7 +5,6 @@ import android.view.Menu
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -34,30 +33,30 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         val view = findViewById<View>(android.R.id.content)
-        databaseViewModel.error.observe(this, Observer {
+        databaseViewModel.error.observe(this) {
             Snackbar.make(view, it.localizedMessage ?: "Error", Snackbar.LENGTH_LONG).show()
-        })
+        }
 
-        restViewModel.error.observe(this, Observer {
+        restViewModel.error.observe(this) {
             Snackbar.make(view, it.localizedMessage ?: "Error", Snackbar.LENGTH_LONG).show()
-        })
+        }
 
         val progressBar = findViewById<View>(R.id.SHOW_PROGRESS)
-        databaseViewModel.loadingStatus.observe(this, Observer {
+        databaseViewModel.loadingStatus.observe(this) {
             progressBar.visibility = if (it) View.VISIBLE else View.GONE
-        })
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        var item = menu?.add("Kucing")
+        var item = menu?.add("HTTP Test")
         item?.setOnMenuItemClickListener {
-            findNavController(R.id.nav_host_fragment).navigate(R.id.action_ConnectionFragment_to_RestFragment)
+            findNavController(R.id.nav_host_fragment).navigate(R.id.openHttp)
             true
         }
 
-        item = menu?.add("Dua")
+        item = menu?.add("GRPC Test")
         item?.setOnMenuItemClickListener {
-            findNavController(R.id.nav_host_fragment).navigate(R.id.action_ConnectionFragment_to_GRPCFragment)
+            findNavController(R.id.nav_host_fragment).navigate(R.id.openGRPC)
             true
         }
         return true

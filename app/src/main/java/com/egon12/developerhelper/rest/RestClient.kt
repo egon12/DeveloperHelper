@@ -14,15 +14,33 @@ data class Response(
     val time: Long
 )
 
-
-data class Request(
+data class RestClientRequest(
     val method: String,
     val url: String,
     val header: Map<String, String>,
     val body: String?
-)
+) {
+    companion object {
+        fun from(req: Collection.Request, env: Map<String, String>): RestClientRequest {
+            return RestClientRequest(
+                method = req.method.toString(),
+                url = Template.fill(req.url.raw, env),
+                header = Template.mapHeader(req.header, env),
+                body = req.body?.raw
+            )
+        }
+    }
+}
+
 
 interface RestClient {
+    suspend fun request(req: RestClientRequest) = this.request(
+        req.method,
+        req.url,
+        req.header,
+        req.body,
+    )
+
     suspend fun request(
         method: String,
         url: String,

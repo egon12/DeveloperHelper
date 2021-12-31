@@ -21,6 +21,9 @@ import com.egon12.developerhelper.database.viewmodel.DatabaseViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
+/**
+ * RowFragment are fragment for editing datum / row in table
+ */
 class RowFragment : Fragment() {
 
     private val model by activityViewModels<DatabaseViewModel>()

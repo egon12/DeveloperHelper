@@ -4,26 +4,58 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     android:label="Connections"
-    app:startDestination="@id/ConnectionFragment">
+    app:startDestination="@id/Connections">
     <fragment
-        android:id="@+id/ConnectionFragment"
-        android:name="com.egon12.developerhelper.database.fragment.ConnectionFragment"
+        android:id="@+id/Connections"
+        android:name="com.egon12.developerhelper.root.ConnectionFragment"
         android:label="Connections"
         tools:layout="@layout/fragment_connection">
+        <action
+            android:id="@+id/editDatabase"
+            app:destination="@id/EditDBConnInfo" />
+        <action
+            android:id="@+id/editHttp"
+            app:destination="@id/EditHttp"
+            />
+        <action android:id="@+id/editGraphQL"/>
+        <action android:id="@+id/editGRPC"/>
+
+
         <action
             android:id="@+id/openDatabase"
             app:destination="@id/DatabaseFragment"
             app:enterAnim="@anim/fragment_open_enter" />
+
         <action
-            android:id="@+id/editDatabase"
-            app:destination="@id/EditConnectionFragment" />
-        <action
-            android:id="@+id/action_ConnectionFragment_to_RestFragment"
+            android:id="@+id/openHttp"
             app:destination="@id/RestFragment" />
         <action
-            android:id="@+id/action_ConnectionFragment_to_GRPCFragment"
+            android:id="@+id/openGRPC"
             app:destination="@id/GRPCFragment" />
+
+        <action android:id="@+id/openGraphQL"/>
     </fragment>
+
+    <fragment
+        android:id="@+id/EditDBConnInfo"
+        android:name="com.egon12.developerhelper.database.fragment.EditDBConnInfo"
+        android:label="Create/Edit Connection"
+        tools:layout="@layout/fragment_edit_db_connection" >
+        <argument
+            android:name="uuid"
+            android:defaultValue="@null"
+            app:argType="java.util.UUID"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/EditHttp"
+        android:name="com.egon12.developerhelper.rest.EditHttpFragment"
+        android:label="Edit Http"
+        tools:layout="@layout/fragment_edit_http_conn_info"/>
+
+
+
     <fragment
         android:id="@+id/DatabaseFragment"
         android:name="com.egon12.developerhelper.database.fragment.DatabaseFragment"
@@ -55,11 +87,6 @@
         android:label="@string/row_fragment_label"
         tools:layout="@layout/fragment_row" />
 
-    <fragment
-        android:id="@+id/EditConnectionFragment"
-        android:name="com.egon12.developerhelper.database.fragment.EditDBConnInfo"
-        android:label="Create/Edit Connection"
-        tools:layout="@layout/fragment_edit_db_connection" />
 
     <fragment
         android:id="@+id/RestFragment"

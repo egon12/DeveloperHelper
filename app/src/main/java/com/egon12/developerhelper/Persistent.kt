@@ -13,7 +13,7 @@ import dagger.hilt.android.components.ActivityRetainedComponent
 import java.util.*
 
 @Database(
-    entities = [ConnInfo::class, DBConnInfo::class, HttpRequest::class, Variables::class],
+    entities = [ConnInfo::class, DBConnInfo::class, RequestGroup::class, HttpRequest::class, Variables::class],
     version = 1
 )
 @TypeConverters(
@@ -27,6 +27,7 @@ abstract class DHDatabase : RoomDatabase() {
     abstract fun databaseDao(): DatabaseDao
     abstract fun httpRequestDao(): HttpRequestDao
     abstract fun variablesDao(): VariablesDao
+    abstract fun requestGroupDao(): RequestGroupDao
 }
 
 @Module
@@ -44,6 +45,9 @@ class DHDatabaseModule() {
 
     @Provides
     fun variablesDao(db: DHDatabase) = db.variablesDao()
+
+    @Provides
+    fun requestGroupDao(db: DHDatabase) = db.requestGroupDao()
 }
 
 fun createDHDatabase(ctx: Context) = Room
@@ -52,6 +56,8 @@ fun createDHDatabase(ctx: Context) = Room
 
 interface HasUUID {
     val uuid: UUID
+
+    override fun equals(other: Any?): Boolean
 }
 
 class UUIDTypeConverter() {

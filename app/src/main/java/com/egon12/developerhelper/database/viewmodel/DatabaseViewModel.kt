@@ -73,6 +73,10 @@ class DatabaseViewModel @ViewModelInject constructor(
         error.postValue(e)
     }
 
+    fun start(uuid: UUID?) {
+        TODO("Not yet implemented")
+    }
+
     companion object {
         const val TAG = "DatabaseViewModel"
     }

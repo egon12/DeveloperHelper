@@ -1,6 +1,7 @@
 package com.egon12.developerhelper.database.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,19 +11,23 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.egon12.developerhelper.ConnInfo
 import com.egon12.developerhelper.R
+import com.egon12.developerhelper.R.id.*
 import com.egon12.developerhelper.database.persistent.DBConnInfo
 import com.egon12.developerhelper.database.persistent.DBType
-import com.egon12.developerhelper.database.viewmodel.DatabaseViewModel
+import com.egon12.developerhelper.database.viewmodel.EditDBViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 
 @AndroidEntryPoint
 class EditDBConnInfo : Fragment() {
 
-    private val viewModel: DatabaseViewModel by activityViewModels()
+    private val model: EditDBViewModel by activityViewModels()
+    private var c: ConnInfo? = null
+    private var d: DBConnInfo? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,75 +38,105 @@ class EditDBConnInfo : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
         super.onViewCreated(view, savedInstanceState)
+        bindView(view)
+        bindSaveButton(view)
+        model.edit.observe(viewLifecycleOwner, this::bindData)
 
-        val etId = view.findViewById<TextInputEditText>(R.id.et_id)
-        val optDBType = view.findViewById<MaterialButtonToggleGroup>(R.id.opt_db_type)
-        val etHost = view.findViewById<TextInputEditText>(R.id.et_host)
-        val etDbName = view.findViewById<TextInputEditText>(R.id.et_dbname)
-        val etUsername = view.findViewById<TextInputEditText>(R.id.et_username)
-        val etPassword = view.findViewById<TextInputEditText>(R.id.et_password)
+        model.start(arguments?.get("uuid") as? UUID?)
+    }
 
-        val btnMysql = view.findViewById<MaterialButton>(R.id.btn_mysql)
-        val btnPostgres = view.findViewById<MaterialButton>(R.id.btn_postgre)
-        val btnHttp = view.findViewById<MaterialButton>(R.id.btn_http)
-        val btnGRPC = view.findViewById<MaterialButton>(R.id.btn_grpc)
-
-        val btnSave = view.findViewById<ExtendedFloatingActionButton>(R.id.btn_save)
-
-        var conn: ConnInfo? = null
-        viewModel.connection.onEdit.observe(viewLifecycleOwner) {
-            conn = it
-            etId.setText(it.name)
+    private fun bindData(it: Pair<ConnInfo, DBConnInfo>) {
+        val (connInfo, dbConnInfo) = it
+        c = connInfo.apply {
+            idEditText.setText(name)
         }
 
-        var dbConn: DBConnInfo? = null
-        viewModel.connection.dbOnEdit.observe(viewLifecycleOwner) {
-            dbConn = it
-            etHost.setText(it.host)
-            etDbName.setText(it.dbName)
-            etUsername.setText(it.username)
-            etPassword.setText(it.password)
-            when (it.type) {
-                DBType.MySQL -> btnMysql.performClick()
-                DBType.Postgre -> btnPostgres.performClick()
+        d = dbConnInfo.apply {
+            hostEditText.setText(host)
+            dbNameEditText.setText(dbName)
+            usernameEditText.setText(username)
+            passwordEditText.setText(password)
+            when (type) {
+                DBType.MySQL -> btnMySQL.performClick()
+                DBType.Postgre -> btnPostgre.performClick()
             }
         }
+    }
 
-        btnSave.shrink()
-
-        val scrollView = view.findViewById<ScrollView>(R.id.scroll_view)
-        scrollView.viewTreeObserver.addOnScrollChangedListener {
-            if (scrollView.getChildAt(0).bottom <= scrollView.height + scrollView.scrollY) {
-                btnSave.extend()
-            } else {
-                btnSave.shrink()
-            }
+    private fun bindView(view: View?) {
+        if (view == null) {
+            Log.e(TAG, "Cannot bind view")
+            findNavController().popBackStack()
+            return
         }
 
-        btnSave.setOnClickListener {
-            conn?.apply {
-                name = etId.text.toString()
+        view.apply {
+            idEditText = findViewById(et_id)
+            hostEditText = findViewById(et_host)
+            dbNameEditText = findViewById(et_dbname)
+            usernameEditText = findViewById(et_username)
+            passwordEditText = findViewById(et_password)
+
+            dbTypeButtonGroup = findViewById(opt_db_type)
+            btnMySQL = findViewById(btn_mysql)
+            btnPostgre = findViewById(btn_postgre)
+        }
+    }
+
+    private fun bindSaveButton(view: View) {
+        view.findViewById<ExtendedFloatingActionButton>(btn_save)?.apply {
+            setOnClickListener {
+                save()
+                findNavController().popBackStack()
             }
 
+            shrink()
 
-
-            dbConn?.apply {
-                host = etHost.text.toString()
-                dbName = etDbName.text.toString()
-                username = etUsername.text.toString()
-                password = etPassword.text.toString()
-                type = when (optDBType.checkedButtonId) {
-                    R.id.btn_mysql -> DBType.MySQL
-                    R.id.btn_postgre -> DBType.Postgre
-                    else -> DBType.MySQL
+            view.findViewById<ScrollView>(scroll_view).let { sv ->
+                sv.viewTreeObserver.addOnScrollChangedListener {
+                    val bottom = sv.getChildAt(0).bottom
+                    when {
+                        bottom <= sv.height + sv.scrollY -> extend()
+                        else -> shrink()
+                    }
                 }
             }
 
-            viewModel.connection.save(conn, dbConn)
-
-            findNavController().popBackStack()
         }
+    }
+
+    private fun save() {
+        val fc = c?.apply {
+            name = idEditText.text.toString()
+        } ?: return
+
+        val fd = d?.apply {
+            host = hostEditText.text.toString()
+            dbName = dbNameEditText.text.toString()
+            username = usernameEditText.text.toString()
+            password = passwordEditText.text.toString()
+            type = when (dbTypeButtonGroup.checkedButtonId) {
+                btn_mysql -> DBType.MySQL
+                btn_postgre -> DBType.Postgre
+                else -> DBType.MySQL
+            }
+        } ?: return
+
+        model.save(fc, fd)
+    }
+
+    private lateinit var idEditText: TextInputEditText
+    private lateinit var hostEditText: TextInputEditText
+    private lateinit var dbNameEditText: TextInputEditText
+    private lateinit var usernameEditText: TextInputEditText
+    private lateinit var passwordEditText: TextInputEditText
+
+    private lateinit var dbTypeButtonGroup: MaterialButtonToggleGroup
+    private lateinit var btnMySQL: MaterialButton
+    private lateinit var btnPostgre: MaterialButton
+
+    companion object {
+        const val TAG = "EditDB"
     }
 }

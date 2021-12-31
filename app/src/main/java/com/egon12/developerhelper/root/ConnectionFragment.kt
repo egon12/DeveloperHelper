@@ -1,4 +1,4 @@
-package com.egon12.developerhelper.database.fragment
+package com.egon12.developerhelper.root
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -14,18 +14,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.egon12.developerhelper.ConnInfo
-import com.egon12.developerhelper.ConnType
 import com.egon12.developerhelper.R
 import com.egon12.developerhelper.UuidDiffUtil
-import com.egon12.developerhelper.database.viewmodel.DatabaseViewModel
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 
 @AndroidEntryPoint
 class ConnectionFragment : Fragment() {
 
-    private val model: DatabaseViewModel by activityViewModels()
+    private val model: ConnectionViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,23 +44,18 @@ class ConnectionFragment : Fragment() {
             adapter = listAdapter
         }
 
-        model.connection.list.observe(viewLifecycleOwner, { listAdapter.submitList(it) })
+        model.list.observe(viewLifecycleOwner) { listAdapter.submitList(it) }
+        model.navigate.observe(viewLifecycleOwner, this::navigate)
 
         val addDbButton = view.findViewById<ExtendedFloatingActionButton>(R.id.fab_db)?.apply {
             shrink(fabChangeCallback)
-            setOnClickListener {
-                model.connection.new()
-                findNavController().navigate(R.id.editDatabase)
-            }
+            setOnClickListener { model.newDatabase() }
         }
 
         val addHttpButton =
-            view.findViewById<ExtendedFloatingActionButton>(R.id.fab_client)?.apply {
+            view.findViewById<ExtendedFloatingActionButton>(R.id.fab_http)?.apply {
                 shrink(fabChangeCallback)
-                setOnClickListener {
-                    model.connection.new()
-                    findNavController().navigate(R.id.editDatabase)
-                }
+                setOnClickListener { model.newHttp() }
             }
 
 
@@ -82,21 +76,16 @@ class ConnectionFragment : Fragment() {
         }
     }
 
-    private fun click(conn: ConnInfo) {
-        val action = when (conn.type) {
-            ConnType.Database -> R.id.openDatabase
-            ConnType.Http -> R.id.action_ConnectionFragment_to_RestFragment
-            else -> throw Exception("Not implemented click on " + conn.type.name)
+
+    private fun navigate(arg: Pair<Int, UUID?>?) {
+        if (arg == null) {
+            return
         }
 
-        val bundle = bundleOf("uuid" to conn.uuid)
-
+        val (action, uuid) = arg
+        val bundle = bundleOf("uuid" to uuid)
         findNavController().navigate(action, bundle)
-    }
-
-    private fun longClick(conn: ConnInfo) {
-        model.connection.edit(conn)
-        findNavController().navigate(R.id.editDatabase)
+        model.navigateDone()
     }
 
     inner class Adapter : ListAdapter<ConnInfo, Adapter.ViewHolder>(UuidDiffUtil(ConnInfo::class)) {
@@ -107,8 +96,8 @@ class ConnectionFragment : Fragment() {
             lateinit var connInfo: ConnInfo
 
             init {
-                itemView.setOnLongClickListener { longClick(connInfo); true }
-                itemView.setOnClickListener { click(connInfo) }
+                itemView.setOnLongClickListener { model.edit(connInfo); true }
+                itemView.setOnClickListener { model.open(connInfo) }
             }
 
             @SuppressLint("SetTextI18n")

@@ -3,6 +3,17 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_baseline_clear_24.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_baseline_expand_more_24.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_baseline_insert_drive_file_24.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_baseline_navigate_next_24.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_baseline_send_24.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_baseline_table_chart_24.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_database.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_devhelper_logo.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.3765" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.27717391304347827" />
         <entry key="app/src/main/res/layout/bottom_sheet_request.xml" value="0.37604166666666666" />
         <entry key="app/src/main/res/layout/content_main.xml" value="0.24375" />
         <entry key="app/src/main/res/layout/fragment_connection.xml" value="0.37604166666666666" />
@@ -10,6 +21,8 @@
         <entry key="app/src/main/res/layout/fragment_edit_http_conn_info.xml" value="0.30570652173913043" />
         <entry key="app/src/main/res/layout/fragment_rest.xml" value="0.22192028985507245" />
         <entry key="app/src/main/res/layout/fragment_row.xml" value="0.20260416666666667" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.3765" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.328" />
       </map>
     </option>
   </component>

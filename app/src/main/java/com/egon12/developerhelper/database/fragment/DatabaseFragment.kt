@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -45,7 +46,11 @@ class DatabaseFragment : Fragment() {
 
         val uuid = uuid ?: return close()
 
-        model.connect(uuid).observe(viewLifecycleOwner, {
+        model.start(uuid).observe(viewLifecycleOwner) {
+            (activity as? AppCompatActivity)?.supportActionBar?.title = it
+        }
+
+        model.connect(uuid).observe(viewLifecycleOwner) {
             when (it) {
                 ConnectionStatus.Connected -> model.table.reload()
                 ConnectionStatus.Disconnected -> close()
@@ -53,13 +58,13 @@ class DatabaseFragment : Fragment() {
                     // Do Nothing
                 }
             }
-        })
+        }
 
         val listAdapter = TableListAdapter()
         model.table.apply {
-            data.observe(viewLifecycleOwner, {
+            data.observe(viewLifecycleOwner) {
                 listAdapter.submitList(it)
-            })
+            }
             reload()
         }
 

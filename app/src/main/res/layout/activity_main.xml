@@ -16,6 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorOnPrimary"
+            app:logo="@drawable/ic_devhelper_logo"
             app:popupTheme="@style/Theme.DeveloperHelper" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -30,7 +31,7 @@
         android:focusable="true"
         android:padding="100dp"
         android:visibility="gone"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <include layout="@layout/content_main" />
 

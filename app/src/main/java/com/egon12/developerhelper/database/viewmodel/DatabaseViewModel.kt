@@ -73,8 +73,11 @@ class DatabaseViewModel @ViewModelInject constructor(
         error.postValue(e)
     }
 
-    fun start(uuid: UUID?) {
-        TODO("Not yet implemented")
+    fun start(uuid: UUID?) = liveData {
+        emit("DB")
+        uuid ?: return@liveData
+        val conn = connectionDao.find(uuid)
+        emit(conn.name)
     }
 
     companion object {
